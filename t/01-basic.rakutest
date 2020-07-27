@@ -1,0 +1,6 @@
+use Test;
+use DocWriter;
+
+pass "replace me";
+
+done-testing;
