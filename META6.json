@@ -4,10 +4,10 @@
     "Tom Browder"
   ],
   "build-depends" : [ ],
-  "depends" : [ 
+  "depends" : [
     "Pod::To::Anything"
   ],
-  "description" : "blah blah blah",
+  "description" : "A tool to convert documents written in Raku POD to beautiful PDF format",
   "license" : "Artistic-2.0",
   "name" : "DocWriter",
   "perl" : "6.d",

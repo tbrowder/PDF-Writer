@@ -3,7 +3,7 @@
 NAME
 ====
 
-DocWriter - blah blah blah
+DocWriter - A tool to convert documents written in Raku POD to beautiful PDF format
 
 SYNOPSIS
 ========
@@ -15,7 +15,7 @@ use DocWriter;
 DESCRIPTION
 ===========
 
-DocWriter is ...
+DocWriter is the "poor man's" word processor.
 
 AUTHOR
 ======
