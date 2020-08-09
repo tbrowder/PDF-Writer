@@ -1,11 +1,13 @@
 unit class DocWriter:ver<0.0.1>:auth<cpan:TBROWDER>;
 
+use Pod::To::Anything;
+
 
 =begin pod
 
 =head1 NAME
 
-DocWriter - blah blah blah
+DocWriter - A tool to convert documents written in Raku POD to beautiful PDF format
 
 =head1 SYNOPSIS
 
@@ -17,7 +19,7 @@ use DocWriter;
 
 =head1 DESCRIPTION
 
-DocWriter is ...
+DocWriter is the "poor man's" word processor.
 
 =head1 AUTHOR
 

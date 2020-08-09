@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/tbrowder/DocWriter/workflows/test/badge.svg)](https://github.com/tbrowder/DocWriter/actions)
+
 NAME
 ====
 

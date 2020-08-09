@@ -4,7 +4,9 @@
     "Tom Browder"
   ],
   "build-depends" : [ ],
-  "depends" : [ ],
+  "depends" : [ 
+    "Pod::To::Anything"
+  ],
   "description" : "blah blah blah",
   "license" : "Artistic-2.0",
   "name" : "DocWriter",
@@ -13,8 +15,14 @@
     "DocWriter" : "lib/DocWriter.rakumod"
   },
   "resources" : [ ],
-  "source-url" : "",
-  "tags" : [ ],
+  "source-url" : "https://github.com/tbrowder/DocWriter.git",
+  "tags" : [
+    "pdf",
+    "document",
+    "letter",
+    "text",
+    "pod"
+  ],
   "test-depends" : [ ],
   "version" : "0.0.1"
 }
