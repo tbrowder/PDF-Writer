@@ -1,21 +1,21 @@
-[![Actions Status](https://github.com/tbrowder/DocWriter/workflows/test/badge.svg)](https://github.com/tbrowder/DocWriter/actions)
+[![Actions Status](https://github.com/tbrowder/PDF-Writer/workflows/test/badge.svg)](https://github.com/tbrowder/PDF-Writer/actions)
 
 NAME
 ====
 
-DocWriter - A tool to convert documents written in Raku POD to beautiful PDF format
+PDF::Writer - A tool to convert documents written in Raku POD to beautiful PDF format
 
 SYNOPSIS
 ========
 
 ```raku
-use DocWriter;
+use PDF::Writer;
 ```
 
 DESCRIPTION
 ===========
 
-DocWriter is the "poor man's" word processor.
+PDF::Writer is the "poor man's" word processor.
 
 AUTHOR
 ======
@@ -25,7 +25,7 @@ Tom Browder <tom.browder@gmail.com>
 COPYRIGHT AND LICENSE
 =====================
 
-Copyright 2020 Tom Browder
+Copyright 2020-2021 Tom Browder
 
-This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
+This library is free software; you can redistribute it or modify it under the Artistic License 2.0.
 
