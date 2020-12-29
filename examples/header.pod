@@ -1,0 +1,16 @@
+=begin header :center :font<Times-Bold>
+
+=begin para :size<14> :face<bold>
+John Doe
+=end para
+
+=begin para :size<12>
+113 Hollywood Dr
+=end para
+
+=begin para :size<12>
+Hollywood, CA 99999
+=end para
+
+=end header
+

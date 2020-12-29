@@ -6,32 +6,91 @@ use PDF::Content::Page :PageSizes;
 use PDF::Content::Font::CoreFont;
 constant CoreFont = PDF::Content::Font::CoreFont;
 
+if not @*ARGS.elems {
+    say qq:to/HERE/;
+    Usage: {$*PROGRAM.IO.basename} mode [options...] <input text file>
+    Modes
+      text - converts the input file's lines to PDF (default)
+      pod  - converts the Raku pod file to PDF
+    Options
+      size - font size (default: 10)
+      font - font name (default: Courier)
+      margins=l,r,t,b (default: one-inch on all sides)
+      paper=T  where T is Letter (default), Legal, A4, or A5
+      verbose
+      debug   - for developer use
+    HERE
+    exit
+}
+
+my $ifil = @*ARGS.pop;
+if not ($ifil.IO.f and $ifil.IO.r) {
+    die "FATAL: Input file '$ifil' cannot be read.";
+}
+
+#enum Paper <Letter Legal A4 A5>;
+enum Font <Courier>;
+enum Weight <Bold>;
+my $text = 1;
+my $pod = 0;
+my $debug = 0;
+my $verbose = 0;
+my $font = Courier;
+my $size = 10;
+my $paper = Letter;
+my ($left,$right,$top,$bottom);
+$left=$right=$top=$bottom=72; # PS points
+
+for @*ARGS {
+    # modes
+    when $_.contains('t', :i) { $text = 1 }
+    # options
+    when $_.contains('d', :i) { $debug = 1 }
+    default { die "FATAL: Unknown arg '$_'" }
+}
+
+# must have a mode
+
+my $line-spacing = $size * 1.25;
+my $height = 11 * 72;
+
 my $pdf = PDF::API6.new;
-
-my $ifil = "page-13-of-16-mods.pdf";
-my $ofil = "page-13-of-16-mods-2.pdf";
-
-# Open an existing PDF file
-$pdf .= open($ifil);
-
-# Add a blank page
-#my $page = $pdf.add-page();
-
-# Retrieve an existing page
-my $page = $pdf.page(1);
+my $ofil = "$ifil.pdf";
 
 # Set the default page size for all pages
-$pdf.media-box = Letter;
+$pdf.media-box = $paper;
 
 # Use a standard PDF core font
 #my CoreFont $font = $pdf.core-font('Helvetica-Bold');
-my $font = $pdf.core-font: :family<Helvetica>; #, :weight<Bold>;
+my $Font = $pdf.core-font: $font.Str; #, :weight<Bold>;
 
-# Add some text to the page
-$page.text: {
-    .font = $font, 9;
-    .text-position = 40, 645;
-    .say('100 sh XYZ');
+my @lines = $ifil.IO.lines;
+
+# for now we just need a conversion to pdf
+# determine how many pages:
+my $lines-per-page = (($height - ($top - $bottom)) / $line-spacing).floor;
+my $npages = (@lines.elems / $lines-per-page).ceiling;
+
+# Add a blank page
+my $page = $pdf.add-page();
+my $x  = $left;
+my $y0 = $height - $top - $line-spacing;
+my $y  = $y0;
+for @lines -> $line is copy {
+    # add the line's text to the page
+    $page.text: {
+        .font = $Font, $size;
+        .text-position = $x, $y;
+        .say($line);
+    }
+
+    $y -= $line-spacing;
+    if $y <= $bottom {
+        # start a new page
+        $page = $pdf.add-page();
+        # reset y
+        $y  = $y0;
+    }
 }
 
 # Save the new PDF
