@@ -1,28 +1,32 @@
 {
-  "auth" : "cpan:TBROWDER",
-  "authors" : [
+  "auth": "cpan:TBROWDER",
+  "authors": [
     "Tom Browder"
   ],
-  "build-depends" : [ ],
-  "depends" : [
-    "Pod::To::Anything"
+  "build-depends": [
   ],
-  "description" : "A tool to convert documents written in Raku POD to beautiful PDF format",
-  "license" : "Artistic-2.0",
-  "name" : "DocWriter",
-  "perl" : "6.d",
-  "provides" : {
-    "DocWriter" : "lib/DocWriter.rakumod"
+  "depends": [
+    "Pod::To::Anything",
+    "Text::Utils"
+  ],
+  "description": "A tool to convert documents written in Raku POD to beautiful PDF format",
+  "license": "Artistic-2.0",
+  "name": "PDF::Writer",
+  "perl": "6.d",
+  "provides": {
+    "PDF::Writer": "lib/PDF/Writer.rakumod"
   },
-  "resources" : [ ],
-  "source-url" : "https://github.com/tbrowder/DocWriter.git",
-  "tags" : [
+  "resources": [
+  ],
+  "source-url": "https://github.com/tbrowder/PDF-Writer.git",
+  "tags": [
     "pdf",
     "document",
     "letter",
     "text",
-    "pod"
+    "Raku pod"
   ],
-  "test-depends" : [ ],
-  "version" : "0.0.1"
+  "test-depends": [
+  ],
+  "version": "0.0.1"
 }
