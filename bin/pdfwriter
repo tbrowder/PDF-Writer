@@ -21,6 +21,7 @@ if not @*ARGS.elems {
     Options
       number          - add line numbers in the left column
       underline       - stroke each baseline with a thin line
+      title[=T]       - add title to the page number line (default: input file name)
       size            - Font size (default: 10)
       font            - Font name (default: Courier)
       margins=l,r,t,b - Margins (default: one-inch on all sides)
@@ -67,6 +68,7 @@ my $weight;
 my $font   = Courier;
 my $size   = 9.5;
 my $paper  = Letter;
+my $title;
 my ($left,$right,$top,$bottom);
 
 $left=$right=$top=$bottom=72; # PS points (1 inch)
@@ -94,6 +96,14 @@ for @*ARGS {
     }
     when /:i w <[eight]>* '=' (\S+) / {
         $weight = ~$0;
+    }
+    when /:i ti <[tle]>* ['=' (\S+)]? / {
+        if $0.defined {
+            $title = ~$0;
+        }
+        else {
+            $title = $ifil;
+        }
     }
     when /:i m <[argins]>* '=' (\S+) ',' (\S+) ',' (\S+) ',' (\S+) / {
         $left   = +$0;
@@ -135,24 +145,16 @@ $pdf.media-box = $paper;
 my $Font = $pdf.core-font: $font.Str; #, :weight<Bold>;
 # default size
 
-my @lines = read-lines $ifil, :$wrap, :$truncate, :$debug;
+my @lines = $ifil.IO.lines;
 
-if 0 { #not ($underline or $wrap or $number) {
-    # time trials showed no significant time savings by processing a page of text for four-page docs
-    make-text-by-pages $pdf, @lines, :$debug;
-    note "DEBUG: finished making text by pages";
-}
-else {
-    make-text-by-lines $pdf, @lines, :$number, :$wrap, :$truncate, :$debug;
-    note "DEBUG: finished making text by line";
-}
+text2pdf $pdf, @lines, :$number, :$wrap, :$truncate, :$underline, :$title, :$debug;
 
 # Save the new PDF
 $pdf.save-as($ofil);
 say "See file '$ofil'";
 
 ##### subroutines #####
-sub make-text-by-lines($pdf, @lines, :$number, :$truncate, :$wrap, :$debug) {
+sub text2pdf($pdf, @lines, :$number, :$truncate, :$wrap, :$underline, :$title, :$debug) {
     # line-by-line (the original method
 
     # for now we just need a conversion to pdf
@@ -191,7 +193,13 @@ sub make-text-by-lines($pdf, @lines, :$number, :$truncate, :$wrap, :$debug) {
             note "DEBUG: numbering page $pnum of $npages" if $debug;
             # add a page number
             ++$pnumbered;
-            my $pp = "Page $pnum of $npages";
+            my $pp;
+            if $title {
+                $pp = "Page $pnum of $npages ($title)";
+            }
+            else {
+                $pp = "Page $pnum of $npages";
+            }
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
                 .font = $Font, $size;
@@ -213,7 +221,13 @@ sub make-text-by-lines($pdf, @lines, :$number, :$truncate, :$wrap, :$debug) {
     if $pnum <= $npages and $pnumbered != $npages {
         # add a page number
         ++$pnumbered;
-        my $pp = "Page $pnumbered of $npages";
+        my $pp;
+        if $title {
+            $pp = "Page $pnum of $npages ($title)";
+        }
+        else {
+            $pp = "Page $pnum of $npages";
+        }
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
             .font = $Font, $size;
@@ -225,6 +239,7 @@ sub make-text-by-lines($pdf, @lines, :$number, :$truncate, :$wrap, :$debug) {
 
 } # make-text-by-lines
 
+=finish
 # time trials showed no significant time savings by processing a page of text for four-page docs
 sub make-text-by-pages($pdf, @lines, :$debug) {
     # page-by-page (an optimization)
@@ -311,19 +326,4 @@ sub make-text-by-pages($pdf, @lines, :$debug) {
     }
     note "DEBUG: have now numbered $pnumbered pages" if $debug and $pnumbered == $npages;
 
-
-
 } # make-text-by-pages
-
-
-sub read-lines($fnam, :$wrap, :$truncate, :$debug --> List) {
-    my @lines;
-    for $fnam.IO.lines -> $line is copy {
-        if $truncate {
-        }
-        elsif $wrap {
-        }
-        @lines.push: $line;
-    }
-    @lines
-}
