@@ -43,24 +43,27 @@ if not ($ifil.IO.f and $ifil.IO.r) {
 }
 
 #enum Paper <Letter Legal A4 A5>;
-enum Font <Courier>;
+enum Font <Courier Times Helvetica>;
 enum Weight <Bold>;
+enum Style <Regular Italic Slant>;
 
 # true/false
 my $truncate = 0;
-my $wrap = 0;
-my $text = 1;
-my $pod = 0;
-my $debug = 0;
-my $verbose = 0;
+my $wrap     = 0;
+my $text     = 1;
+my $pod      = 0;
+my $debug    = 0;
+my $verbose  = 0;
 
 # value inputs
-my $font = Courier;
-my $size = 10;
-my $paper = Letter;
+my $style;
+my $weight;
+my $font   = Courier;
+my $size   = 10;
+my $paper  = Letter;
 my ($left,$right,$top,$bottom);
 
-$left=$right=$top=$bottom=72; # PS points
+$left=$right=$top=$bottom=72; # PS points (1 inch)
 
 for @*ARGS {
     # options
@@ -75,8 +78,14 @@ for @*ARGS {
     when /:i pa <[per]>* '=' (\S+) / {
         $paper = ~$0;
     }
-    when /:i s <[ize]>* '=' (\S+) / {
-        $size = +$0;
+    when /:i st <[tyle]>* '=' (\S+) / {
+        $style = ~$0;
+    }
+    when /:i si <[ze]>* '=' (\S+) / {
+        $size = ~$0;
+    }
+    when /:i w <[eight]>* '=' (\S+) / {
+        $weight = ~$0;
     }
     when /:i m <[argins]>* '=' (\S+) ',' (\S+) ',' (\S+) ',' (\S+) / {
         $left   = +$0;
@@ -86,8 +95,9 @@ for @*ARGS {
     }
 
     # modes
-    when $_.contains('t', :i) { $text = 1 }
-    when $_.contains('p', :i) { $pod = 1 }
+    when $_.contains('t', :i) { $text = 1; $pod = 0 }
+    when $_.contains('p', :i) { $pod = 1; $text = 0 }
+
     default { die "FATAL: Unknown arg '$_'" }
 }
 
@@ -107,14 +117,26 @@ if $debug {
    exit;
 }
 
+# GLOBAL VALUES =====================================
 # Set the default page size for all pages
 $pdf.media-box = $paper;
 
 # Use a standard PDF core font
-#my CoreFont $font = $pdf.core-font('Helvetica-Bold');
 my $Font = $pdf.core-font: $font.Str; #, :weight<Bold>;
 
-my @lines = $ifil.IO.lines;
+sub read-lines($fnam, :$wrap, :$truncate, :$debug --> List) {
+    my @lines;
+    for $fnam.IO.lines -> $line is copy {
+        if $truncate {
+        }
+        elsif $wrap {
+        }
+        @lines.push: $line;
+    }
+    @lines
+}
+
+my @lines = read-lines $ifil, :$wrap, :$truncate, :$debug;
 
 # for now we just need a conversion to pdf
 # determine how many pages:
