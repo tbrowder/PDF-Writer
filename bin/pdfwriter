@@ -30,7 +30,7 @@ if not @*ARGS.elems {
       debug           - For developer use
 
     Notes
-      Modes and options may be selected by the minimum number of unique 
+      Modes and options may be selected by the minimum number of unique
         leading characters, e.g., 'te' selects 'text' and 'tr' selects
         'truncate'.
     HERE
@@ -66,23 +66,23 @@ for @*ARGS {
     # options
     when $_.contains('v', :i) { $verbose = 1 }
     when $_.contains('d', :i) { $debug = 1 }
-    when /:i tr <[uncate]>* '=' (\d+) / { 
-        $truncate = +$0; 
+    when /:i tr <[uncate]>* '=' (\d+) / {
+        $truncate = +$0;
     }
-    when /:i w <[rap]>* '=' (\d+) / { 
-        $wrap = +$0; 
+    when /:i w <[rap]>* '=' (\d+) / {
+        $wrap = +$0;
     }
-    when /:i pa <[per]>* '=' (\S+) / { 
-        $paper = ~$0; 
+    when /:i pa <[per]>* '=' (\S+) / {
+        $paper = ~$0;
     }
-    when /:i s <[ize]>* '=' (\S+) / { 
-        $size = +$0; 
+    when /:i s <[ize]>* '=' (\S+) / {
+        $size = +$0;
     }
-    when /:i m <[argins]>* '=' (\S+) ',' (\S+) ',' (\S+) ',' (\S+) / { 
-        $left   = +$0; 
-        $right  = +$1; 
-        $top    = +$2; 
-        $bottom = +$3; 
+    when /:i m <[argins]>* '=' (\S+) ',' (\S+) ',' (\S+) ',' (\S+) / {
+        $left   = +$0;
+        $right  = +$1;
+        $top    = +$2;
+        $bottom = +$3;
     }
 
     # modes
@@ -91,13 +91,21 @@ for @*ARGS {
     default { die "FATAL: Unknown arg '$_'" }
 }
 
-# must have a mode
+if $pod {
+   die "FATAL: The pod mode is not yet implemented.";
+}
 
+# some default setting to get started
 my $line-spacing = $size * 1.25;
 my $height = 11 * 72;
 
 my $pdf = PDF::API6.new;
-my $ofil = "$ifil.pdf";
+my $ofil = $ifil;
+$ofil ~~ s/'.' <-[.]>+ $/.pdf/;
+if $debug {
+   say "DEBUG: infile '$ifil'; outfile '$ofil'";
+   exit;
+}
 
 # Set the default page size for all pages
 $pdf.media-box = $paper;
@@ -113,12 +121,35 @@ my @lines = $ifil.IO.lines;
 my $lines-per-page = (($height - ($top - $bottom)) / $line-spacing).floor;
 my $npages = (@lines.elems / $lines-per-page).ceiling;
 
-# Add a blank page
+# add an optimization
+my @pages;
+my $str = '';
+
+my $pn = 0;
+for @lines -> $line {
+    ++$pn;
+    if $pn > $npages {
+        # put the string of page text away
+        @pages.push: $str;
+        # reinitialize it
+        $str = '';
+    }
+    $str ~= $line;
+}
+if $str {
+    @pages.push: $str;
+}
+if @pages.elems != $npages {
+    die "FATAL: \$npages ($npages) != \@pages.elems ({@pages.elems})";
+}
+
+# Add a blank page to start
 my $page = $pdf.add-page();
 my $x  = $left;
 my $y0 = $height - $top - $line-spacing;
 my $y  = $y0;
-for @lines -> $line is copy {
+my $pnum = 1;
+for @lines -> $line {
     # add the line's text to the page
     $page.text: {
         .font = $Font, $size;
@@ -128,13 +159,43 @@ for @lines -> $line is copy {
 
     $y -= $line-spacing;
     if $y <= $bottom {
+        # add a page number
+        my $pp = "Page $pnum of $npages";
+        my $yy = 36; # 1/2 inches from the bottom
+        $page.text: {
+            .font = $Font, $size;
+            .text-position = $x, $yy;
+            .say($pp);
+        }
         # start a new page
         $page = $pdf.add-page();
+        ++$pnum;
         # reset y
         $y  = $y0;
+    }
+}
+# make sure the last page is numbered
+if $pnum < $npages {
+    # add a page number
+    ++$pnum;
+    my $pp = "Page $pnum of $npages";
+    my $yy = 36; # 1/2 inches from the bottom
+    $page.text: {
+        .font = $Font, $size;
+        .text-position = $x, $yy;
+        .say($pp);
     }
 }
 
 # Save the new PDF
 $pdf.save-as($ofil);
 say "See file '$ofil'";
+
+##### subroutines #####
+sub make-text-doc1($pdf, @lines, $npages) {
+    # line-by-line
+}
+
+sub make-text-doc2() {
+    # page-by-page
+}
