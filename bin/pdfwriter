@@ -6,19 +6,33 @@ use PDF::Content::Page :PageSizes;
 use PDF::Content::Font::CoreFont;
 constant CoreFont = PDF::Content::Font::CoreFont;
 
+my $usage = 0;
 if not @*ARGS.elems {
     say qq:to/HERE/;
     Usage: {$*PROGRAM.IO.basename} mode [options...] <input text file>
+
     Modes
-      text - converts the input file's lines to PDF (default)
-      pod  - converts the Raku pod file to PDF
+      text - Converts the input file's lines to PDF (default)
+      pod  - Converts the Raku pod file to PDF using :config
+               options. See pod examples in the examples directory.
+
     Options
-      size - font size (default: 10)
-      font - font name (default: Courier)
-      margins=l,r,t,b (default: one-inch on all sides)
-      paper=T  where T is Letter (default), Legal, A4, or A5
-      verbose
-      debug   - for developer use
+      size            - Font size (default: 10)
+      font            - Font name (default: Courier)
+      margins=l,r,t,b - Margins (default: one-inch on all sides)
+      paper=T         - Where T is Letter (default), Legal, A4, or A5
+      truncate=N      - Where N is the max number of chars on a line
+                          and the rest are ignored
+      wrap=N          - Where N is the max number of chars on a line
+                          and the rest are wrapped to as many lines
+                          as needed
+      verbose         - Details of the execution
+      debug           - For developer use
+
+    Notes
+      Modes and options may be selected by the minimum number of unique 
+        leading characters, e.g., 'te' selects 'text' and 'tr' selects
+        'truncate'.
     HERE
     exit
 }
@@ -31,21 +45,49 @@ if not ($ifil.IO.f and $ifil.IO.r) {
 #enum Paper <Letter Legal A4 A5>;
 enum Font <Courier>;
 enum Weight <Bold>;
+
+# true/false
+my $truncate = 0;
+my $wrap = 0;
 my $text = 1;
 my $pod = 0;
 my $debug = 0;
 my $verbose = 0;
+
+# value inputs
 my $font = Courier;
 my $size = 10;
 my $paper = Letter;
 my ($left,$right,$top,$bottom);
+
 $left=$right=$top=$bottom=72; # PS points
 
 for @*ARGS {
+    # options
+    when $_.contains('v', :i) { $verbose = 1 }
+    when $_.contains('d', :i) { $debug = 1 }
+    when /:i tr <[uncate]>* '=' (\d+) / { 
+        $truncate = +$0; 
+    }
+    when /:i w <[rap]>* '=' (\d+) / { 
+        $wrap = +$0; 
+    }
+    when /:i pa <[per]>* '=' (\S+) / { 
+        $paper = ~$0; 
+    }
+    when /:i s <[ize]>* '=' (\S+) / { 
+        $size = +$0; 
+    }
+    when /:i m <[argins]>* '=' (\S+) ',' (\S+) ',' (\S+) ',' (\S+) / { 
+        $left   = +$0; 
+        $right  = +$1; 
+        $top    = +$2; 
+        $bottom = +$3; 
+    }
+
     # modes
     when $_.contains('t', :i) { $text = 1 }
-    # options
-    when $_.contains('d', :i) { $debug = 1 }
+    when $_.contains('p', :i) { $pod = 1 }
     default { die "FATAL: Unknown arg '$_'" }
 }
 
