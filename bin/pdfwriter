@@ -130,8 +130,11 @@ my $height = 11 * 72;
 my $width = 8.5 * 72;
 
 my $pdf = PDF::API6.new;
-my $ofil = $ifil;
-$ofil ~~ s/'.' <-[.]>+ $/.pdf/;
+if $ifil ~~ /:i pdf $/ {
+    die "FATAL: Not attempting to read a file with name ending in 'pdf': $ifil ";
+}
+
+my $ofil = $ifil ~ '.pdf';
 if $debug {
    say "DEBUG: infile '$ifil'; outfile '$ofil'";
    exit;
