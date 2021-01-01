@@ -7,6 +7,10 @@ use PDF::Content::Font::CoreFont;
 constant CoreFont = PDF::Content::Font::CoreFont;
 
 use Text::Utils :ALL;
+use Config::TOML;
+
+my %config; # toml hash
+my $cfil = "{%*ENV<HOME>}/.pdfwriter/default.toml";
 
 my $usage = 0;
 if not @*ARGS.elems {
@@ -19,9 +23,9 @@ if not @*ARGS.elems {
                options. See pod examples in the examples directory.
 
     Options
-      number          - add line numbers in the left column
-      underline       - stroke each baseline with a thin line
-      title[=T]       - add title to the page number line (default: input file name)
+      number          - Add line numbers in the left column
+      underline       - Stroke each baseline with a thin line
+      title[=T]       - Add title to the page number line (default: input file name)
       size            - Font size (default: 10)
       font            - Font name (default: Courier)
       margins=l,r,t,b - Margins (default: one-inch on all sides)
@@ -38,6 +42,8 @@ if not @*ARGS.elems {
       Modes and options may be selected by the minimum number of unique
         leading characters, e.g., 'te' selects 'text' and 'tr' selects
         'truncate'.
+      You may enter personal defaults in a TOML file defined at:
+        '\$HOME/.pdfwriter/default.toml'
     HERE
     exit
 }
@@ -52,65 +58,95 @@ enum Font <Courier Times Helvetica>;
 enum Weight <Bold>;
 enum Style <Regular Italic Slant>;
 
-# true/false
-my $number    = 0;
-my $underline = 0;
-my $truncate  = 0;
-my $wrap      = 0;
 my $text      = 1;
 my $pod       = 0;
 my $debug     = 0;
 my $verbose   = 0;
 
-# value inputs
-my $style;
-my $weight;
-my $font   = Courier;
-my $size   = 9.5;
-my $paper  = Letter;
-my $title;
-my ($left,$right,$top,$bottom);
 
-$left=$right=$top=$bottom=72; # PS points (1 inch)
+class Doc {...}
+my $doc = Doc.new;
+
+class Doc {
+    # doc attrs with defaults:
+    has $.font  is rw = Courier;
+    has $.size  is rw = 9.5;
+    has $.paper is rw = Letter;
+    has $.title is rw = 1;
+    # margins
+    has $.left   is rw = 72; # PS points (1 inch)
+    has $.right  is rw = 72; # PS points (1 inch)
+    has $.top    is rw = 72; # PS points (1 inch)
+    has $.bottom is rw = 72; # PS points (1 inch)
+
+    # the following doc attrs have false defaults (i.e., not defined):
+    has $.number        is rw;
+    has $.underline     is rw;
+    has $.style         is rw;
+    has $.weight        is rw;
+    has $.truncate      is rw;
+    has $.wrap          is rw;
+    has $.leading       is rw = 9.5 * 1.25; # space between baselines
+    has $.leading-ratio is rw = 1.25;       # used as font size times ratio equals leading distance
+
+    # want some special methods
+    method set-leading() {
+        $!leading = $!size * $!leading-ratio;
+    }
+    multi method set-size($val, :$leading-ratio) {
+        $!size          = $val;
+        $!leading-ratio = $leading-ratio;
+        $!leading       = $!size * $!leading-ratio;
+    }
+    multi method set-size($val, :$leading) {
+        $!size          = $val;
+        $!leading       = $leading;
+        $!leading-ratio = $!leading / $!size;
+    }
+}
+
 
 for @*ARGS {
     # options
-    when $_.contains(/:i ^u/) { $underline = 1 }
-    when $_.contains(/:i ^v/) { $verbose = 1 }
-    when $_.contains(/:i ^d/) { $debug = 1 }
-    when $_.contains(/:i ^n/) { $number = 1 }
+    # doc options
+    when $_.contains(/:i ^u/) { $doc.underline = 1 }
+    when $_.contains(/:i ^n/) { $doc.number = 1 }
     when /:i tr <[uncate]>* '=' (\d+) / {
-        $truncate = +$0;
+        $doc.truncate = +$0;
     }
     when /:i w <[rap]>* '=' (\d+) / {
-        $wrap = +$0;
+        $doc.wrap = +$0;
     }
     when /:i pa <[per]>* '=' (\S+) / {
-        $paper = ~$0;
+        $doc.paper = ~$0;
     }
     when /:i st <[tyle]>* '=' (\S+) / {
-        $style = ~$0;
+        $doc.style = ~$0;
     }
     when /:i si <[ze]>* '=' (\S+) / {
-        $size = ~$0;
+        $doc.size = ~$0;
     }
     when /:i w <[eight]>* '=' (\S+) / {
-        $weight = ~$0;
+        $doc.weight = ~$0;
     }
     when /:i ti <[tle]>* ['=' (\S+)]? / {
         if $0.defined {
-            $title = ~$0;
+            $doc.title = ~$0;
         }
         else {
-            $title = $ifil;
+            $doc.title = $ifil;
         }
     }
     when /:i m <[argins]>* '=' (\S+) ',' (\S+) ',' (\S+) ',' (\S+) / {
-        $left   = +$0;
-        $right  = +$1;
-        $top    = +$2;
-        $bottom = +$3;
+        $doc.left   = +$0;
+        $doc.right  = +$1;
+        $doc.top    = +$2;
+        $doc.bottom = +$3;
     }
+
+    # other options
+    when $_.contains(/:i ^v/) { $verbose = 1 }
+    when $_.contains(/:i ^d/) { $debug = 1 }
 
     # modes
     when $_.contains(/:i ^t/) { $text = 1; $pod = 0 }
@@ -119,13 +155,44 @@ for @*ARGS {
     default { die "FATAL: Unknown arg '$_'" }
 }
 
+if $cfil.IO.r {
+    %config = from-toml :file($cfil);
+    note "Found your 'default.toml' file." if $debug;
+    if $debug {
+        note "DEBUG: Dumping \%config:";
+        note %config.raku;
+        note "DEBUG early exit";
+        exit;
+    }
+    # extract and set vars
+    my $err = 0;
+    my $def = %config<default> // ++$err;
+    if $err {
+        note "WARNING: Cannot find config key: default.";
+        note "         You may have unexpected results.";
+        exit;
+    }
+    my %h = %config{$def};
+    for %h.kv -> $k, $v {
+        note "  $k => '$v'" if $debug;
+        given $k {
+            when $k eq 'underline' { $doc.underline = $k }
+            default { ++$err; note "Unknown config key: $k" }
+        }
+    }
+    note "WARNING: One or more unknown config keys were found.";
+    note "         You may have unexpected results.";
+}
+else {
+    note "No 'default.toml' file was found in your home directory, subdir '.pdfwriter'."
+}
+
 if $pod {
    die "FATAL: The pod mode is not yet implemented.";
 }
 
 # some default settings to get started
 # TODO define a page class to hold such things
-my $line-spacing = $size * 1.25;
 my $height = 11 * 72;
 my $width = 8.5 * 72;
 
@@ -142,45 +209,45 @@ if $debug {
 
 # GLOBAL VALUES =====================================
 # Set the default page size for all pages
-$pdf.media-box = $paper;
+$pdf.media-box = $doc.paper;
 
 # Use a standard PDF core font
-my $Font = $pdf.core-font: $font.Str; #, :weight<Bold>;
+my $Font = $pdf.core-font: :font($doc.font); #, :weight<Bold>;
 # default size
 
 my @lines = $ifil.IO.lines;
 
-text2pdf $pdf, @lines, :$number, :$wrap, :$truncate, :$underline, :$title, :$debug;
+text2pdf $pdf, @lines, :$doc, :$debug;
 
 # Save the new PDF
 $pdf.save-as($ofil);
 say "See file '$ofil'";
 
 ##### subroutines #####
-sub text2pdf($pdf, @lines, :$number, :$truncate, :$wrap, :$underline, :$title, :$debug) {
+sub text2pdf($pdf, @lines, :$doc, :$debug) {
     # line-by-line (the original method
 
     # for now we just need a conversion to pdf
     # determine how many pages:
-    my $lines-per-page = (($height - ($top - $bottom)) / $line-spacing).floor;
+    my $lines-per-page = (($height - ($doc.top - $doc.bottom)) / $doc.leading).floor;
     my $npages = (@lines.elems / $lines-per-page).ceiling;
 
     # Add a blank page to start
     my $page = $pdf.add-page();
-    my $x  = $left;
-    my $y0 = $height - $top - $line-spacing;
+    my $x  = $doc.left;
+    my $y0 = $height - $doc.top - $doc.leading;
     my $y  = $y0;
     my $pnum      = 1; # for page numbering and control
     my $pnumbered = 0; # for page numbering and control
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            .font = $Font, $size;
+            .font = $Font, $doc.size;
             .text-position = $x, $y;
             .say($line);
         }
-        if $underline {
-            my $xx = $width - $right;
+        if $doc.underline {
+            my $xx = $width - $doc.right;
             $page.graphics: {
                 # automatically protects with a Save/Restore
                 # need thinnest line from $x to $width-$right
@@ -191,21 +258,21 @@ sub text2pdf($pdf, @lines, :$number, :$truncate, :$wrap, :$underline, :$title, :
             }
         }
 
-        $y -= $line-spacing;
-        if $y <= $bottom {
+        $y -= $doc.leading;
+        if $y <= $doc.bottom {
             note "DEBUG: numbering page $pnum of $npages" if $debug;
             # add a page number
             ++$pnumbered;
             my $pp;
-            if $title {
-                $pp = "Page $pnum of $npages ($title)";
+            if $doc.title {
+                $pp = "Page $pnum of $npages ($doc.title)";
             }
             else {
                 $pp = "Page $pnum of $npages";
             }
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
-                .font = $Font, $size;
+                .font = $Font, $doc.size;
                 .text-position = $x, $yy;
                 .say($pp);
             }
@@ -225,15 +292,15 @@ sub text2pdf($pdf, @lines, :$number, :$truncate, :$wrap, :$underline, :$title, :
         # add a page number
         ++$pnumbered;
         my $pp;
-        if $title {
-            $pp = "Page $pnum of $npages ($title)";
+        if $doc.title {
+            $pp = "Page $pnum of $npages ($doc.title)";
         }
         else {
             $pp = "Page $pnum of $npages";
         }
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
-            .font = $Font, $size;
+            .font = $Font, $doc.size;
             .text-position = $x, $yy;
             .say($pp);
         }
