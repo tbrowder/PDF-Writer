@@ -67,12 +67,12 @@ my $verbose   = 0;
 my $toml;
 
 class Doc {...}
-my $doc = Doc.new;
 
 class Doc {
     # doc attrs that depend upon PDF::API6
-    has $.Page;
-    has $.Font:
+    has $.Page is rw;
+    #has $.Font is rw;
+    has $.Pdf  is rw;
 
     # all attrs below here may be defined in the TOML file
     # doc attrs with defaults:
@@ -80,6 +80,7 @@ class Doc {
     has $.size  is rw = 9.5;
     has $.paper is rw = Letter;
     has $.title is rw = 1;
+
     # margins
     has $.left   is rw = 72; # PS points (1 inch)
     has $.right  is rw = 72; # PS points (1 inch)
@@ -87,6 +88,9 @@ class Doc {
     has $.bottom is rw = 72; # PS points (1 inch)
 
     # the following doc attrs have false defaults (i.e., not defined):
+    has $.height        is rw;
+    has $.width         is rw;
+
     has $.number        is rw;
     has $.underline     is rw;
     has $.style         is rw;
@@ -111,6 +115,7 @@ class Doc {
         $!leading-ratio = $!leading / $!size;
     }
 }
+my $doc = Doc.new;
 
 
 for @*ARGS {
@@ -186,12 +191,17 @@ if $cfil.IO.r {
     for %h.kv -> $k, $v {
         note "  $k => '$v'" if $debug;
         given $k {
-            when $k eq 'underline' { $doc.underline = $k }
+            when $k eq 'underline' { $doc.underline = $v }
+            when $k eq 'leading-ratio' { $doc.leading-ratio = $v }
+            when $k eq 'size' { $doc.size = $v }
+            when $k eq 'font' { $doc.font = $v }
             default { ++$err; note "Unknown config key: $k" }
         }
     }
-    note "WARNING: One or more unknown config keys were found.";
-    note "         You may have unexpected results.";
+    if $err {
+        note "WARNING: One or more unknown config keys were found.";
+        note "         You may have unexpected results.";
+    }
 }
 else {
     note "No 'default.toml' file was found in your home directory, subdir '.pdfwriter'."
@@ -203,10 +213,12 @@ if $pod {
 
 # some default settings to get started
 # TODO define a page class to hold such things
-$doc.height = 11 * 72;
-$doc.width = 8.5 * 72;
+$doc.height = 11  * 72;
+$doc.width  = 8.5 * 72;
 
-$doc.pdf = PDF::API6.new;
+$doc.Pdf = PDF::API6.new;
+
+
 if $ifil ~~ /:i pdf $/ {
     die "FATAL: Not attempting to read a file with name ending in 'pdf': $ifil ";
 }
@@ -219,10 +231,13 @@ if $debug {
 
 # GLOBAL VALUES =====================================
 # Set the default page size for all pages
-$doc.pdf.media-box = $doc.paper;
+$doc.Pdf.media-box = $doc.paper;
 
-# Use a standard PDF core font
-$doc.Font = $doc.pdf.core-font: :font($doc.font); #, :weight<Bold>;
+
+#$doc.Font = $doc.Pdf.core-font(:family<Courier>); #, :weight<Bold>;
+my $Font = $doc.Pdf.core-font(:family($doc.font)); #, :weight<Bold>;
+my $Size = $doc.size;
+
 # default size
 
 my @lines = $ifil.IO.lines;
@@ -230,7 +245,7 @@ my @lines = $ifil.IO.lines;
 text2pdf @lines, :$doc, :$debug;
 
 # Save the new PDF
-$doc.pdf.save-as($ofil);
+$doc.Pdf.save-as($ofil);
 say "See file '$ofil'";
 
 ##### subroutines #####
@@ -243,7 +258,7 @@ sub text2pdf(@lines, :$doc, :$debug) {
     my $npages = (@lines.elems / $lines-per-page).ceiling;
 
     # Add a blank page to start
-    my $page = $doc.pdf.add-page();
+    my $page = $doc.Pdf.add-page();
     my $x  = $doc.left;
     my $y0 = $doc.height - $doc.top - $doc.leading;
     my $y  = $y0;
@@ -252,7 +267,7 @@ sub text2pdf(@lines, :$doc, :$debug) {
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            .font = $doc.Font, $doc.size;
+            .font = $Font, $Size;
             .text-position = $x, $y;
             .say($line);
         }
@@ -282,13 +297,13 @@ sub text2pdf(@lines, :$doc, :$debug) {
             }
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
-                .font = $doc.Font, $doc.size;
+                .font = $Font, $Size;
                 .text-position = $x, $yy;
                 .say($pp);
             }
 
             # start a new page
-            $page = $doc.pdf.add-page();
+            $page = $doc.Pdf.add-page();
             ++$pnum;
             # reset y
             $y  = $y0;
@@ -310,7 +325,7 @@ sub text2pdf(@lines, :$doc, :$debug) {
         }
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
-            .font = $doc.Font, $doc.size;
+            .font = $Font, $Size;
             .text-position = $x, $yy;
             .say($pp);
         }
