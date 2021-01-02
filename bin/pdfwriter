@@ -35,7 +35,9 @@ if not @*ARGS.elems {
       wrap=N          - Where N is the max number of chars on a line
                           and the rest are wrapped to as many lines
                           as needed
-      verbose         - Details of the execution
+      config=F        - Where F is the name of a TOML file other than
+                          the default location
+      verbose         - See more etails of the execution
       debug           - For developer use
 
     Notes
@@ -53,7 +55,7 @@ if not ($ifil.IO.f and $ifil.IO.r) {
     die "FATAL: Input file '$ifil' cannot be read.";
 }
 
-#enum Paper <Letter Legal A4 A5>;
+#enum Paper <Letter Legal A4 A5>; # this enum is already defined in PDF::API6
 enum Font <Courier Times Helvetica>;
 enum Weight <Bold>;
 enum Style <Regular Italic Slant>;
@@ -62,7 +64,7 @@ my $text      = 1;
 my $pod       = 0;
 my $debug     = 0;
 my $verbose   = 0;
-
+my $toml;
 
 class Doc {...}
 my $doc = Doc.new;
@@ -72,6 +74,7 @@ class Doc {
     has $.Page;
     has $.Font:
 
+    # all attrs below here may be defined in the TOML file
     # doc attrs with defaults:
     has $.font  is rw = Courier;
     has $.size  is rw = 9.5;
@@ -112,7 +115,7 @@ class Doc {
 
 for @*ARGS {
     # options
-    # doc options
+    # doc options (may be defined in the config file)
     when $_.contains(/:i ^u/) { $doc.underline = 1 }
     when $_.contains(/:i ^n/) { $doc.number = 1 }
     when /:i tr <[uncate]>* '=' (\d+) / {
@@ -151,6 +154,9 @@ for @*ARGS {
     # other options
     when $_.contains(/:i ^v/) { $verbose = 1 }
     when $_.contains(/:i ^d/) { $debug = 1 }
+    when /:i c <[onfig]>* '=' (\S+) / {
+        $toml = ~$0;
+    }
 
     # modes
     when $_.contains(/:i ^t/) { $text = 1; $pod = 0 }

@@ -1,0 +1,9 @@
+default = "sent-rcvd"
+
+[sent-rcvd]
+line-spacing-ratio = 1.35
+font = "Courier"
+size = 9.5
+underline = 1
+ 
+
