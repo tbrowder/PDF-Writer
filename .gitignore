@@ -1,5 +1,7 @@
 .precomp/
-*pdf
-./longdoc.txt
-./longdoc.txt.pdf
-./pdfwriter
+
+*.pdf
+
+longdoc.txt
+longdoc.txt.pdf
+pdfwriter
