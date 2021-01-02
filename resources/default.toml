@@ -1,7 +1,13 @@
+# Set the value of "default" to the name of the table
+# to use for the current configuration defaults.
+#
+# Future plans are to allow an array of table names to
+# be used.
+
 default = "sent-rcvd"
 
 [sent-rcvd]
-line-spacing-ratio = 1.35
+leading-ratio = 1.35
 font = "Courier"
 size = 9.5
 underline = 1
