@@ -47,7 +47,27 @@ DESCRIPTION
 
   * user configuration file using TOML formats
 
-On the list of forthcoming features are:
+Here is an example of the author's current configuration file:
+
+    # Place these contents as file '$HOME/.pdfwriter/default.toml'
+    # in order to be found by 'pdfwriter'.
+    #
+    # Set the value of "default" to the name of the table
+    # to use for the current configuration defaults.
+    #
+    # Future plans are to allow an array of table names to
+    # be used.
+
+    default = "sent-rcvd"
+
+    [sent-rcvd]
+    leading-ratio = 1.35
+    font = "Courier"
+    size = 9.5
+    underline = 1
+
+Some planned features
+---------------------
 
   * line numbering for code printouts
 

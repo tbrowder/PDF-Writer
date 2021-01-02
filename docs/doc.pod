@@ -36,7 +36,29 @@ ability for the user to control many aspects of the document including:
 =item underlining
 =item user configuration file using TOML formats
 
-On the list of forthcoming features are:
+Here is an example of the author's current configuration 
+file:
+
+=begin code
+# Place these contents as file '$HOME/.pdfwriter/default.toml'
+# in order to be found by 'pdfwriter'.
+#
+# Set the value of "default" to the name of the table
+# to use for the current configuration defaults.
+#
+# Future plans are to allow an array of table names to
+# be used.
+
+default = "sent-rcvd"
+
+[sent-rcvd]
+leading-ratio = 1.35
+font = "Courier"
+size = 9.5
+underline = 1
+=end code
+
+=head2 Some planned features
 
 =item line numbering for code printouts
 =item line wrapping for paragraphs
