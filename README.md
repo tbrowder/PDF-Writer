@@ -1,6 +1,9 @@
 [![Actions Status](https://github.com/tbrowder/PDF-Writer/workflows/test/badge.svg)](https://github.com/tbrowder/PDF-Writer/actions)
 
-NAME ====
+head
+====
+
+NAME
 
 PDF::Writer - Provides 'pdfwriter', a program to convert documents written in Raku POD to beautiful PDF format
 
@@ -8,23 +11,44 @@ THIS IS A WORK IN PROGRESS BUT IT IS VERY USABLE
 
 Please try it out and file feature requests and bug reports. PRs welcome. The author often hangs out as 'tbrowder' on IRC channel `#raku`.
 
-SYNOPSIS ========
+head
+====
 
-```raku $ zef install PDF::Writer; ... $ pdfwriter ...extensive help $ $ pdfwriter some-text-file.txt See file 'some-text-file.txt.pdf' ```
+SYNOPSIS
 
-DESCRIPTION ===========
+    $ zef install PDF::Writer;
+    ...
+    $ pdfwriter
+    ...extensive help
+    $
+    $ pdfwriter some-text-file.txt
+    See file 'some-text-file.txt.pdf'
+
+head
+====
+
+DESCRIPTION
 
 PDF::Writer is the "poor man's" word processor.
 
-CREDITS =======
+head
+====
+
+CREDITS
 
 This project could not exist without all the many contributors to Raku since its begginning by Larry Wall, including the fine module `PDF::API6` by David Warring.
 
-AUTHOR ======
+head
+====
+
+AUTHOR
 
 Tom Browder <tbrowder@cpan.org>
 
-COPYRIGHT AND LICENSE =====================
+head
+====
+
+COPYRIGHT AND LICENSE
 
 Copyright © 2020-2021 Tom Browder
 
