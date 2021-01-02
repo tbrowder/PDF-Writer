@@ -2,5 +2,8 @@ Revision history for PDF-Writer
 
 {{$NEXT}}
 
+0.0.2  2021-01-02T15:17:09-06:00
+    - fix errors in reading the config file
+
 0.0.1  2021-01-02T06:45:05-06:00
     - Initial version
