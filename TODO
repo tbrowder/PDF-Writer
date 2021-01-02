@@ -2,3 +2,16 @@ Start basic pod handling with commands at top in a config block
 
 Improve the paper and margin handling like the Cal Moon program
 
+Add TOML input capability
+
+Add a Doc class to define page and other document attributes
+
+Add subroutines to wrap PDF commands for oft-used commands, e.g,
+  box
+  circle
+  oval
+  para
+  header
+
+
+
