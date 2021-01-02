@@ -7,6 +7,7 @@
   ],
   "depends": [
     "Pod::To::Anything",
+    "Config::TOML",
     "Text::Utils"
   ],
   "description": "A tool to convert documents written in Raku POD to beautiful PDF format",
