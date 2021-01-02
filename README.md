@@ -5,9 +5,9 @@ NAME
 
 
 
-PDF::Writer - Provides 'pdfwriter', a program to convert documents written in Raku POD to beautiful PDF format
+**PDF::Writer** - Provides `pdfwriter`, a program to convert documents written in Raku POD to beautiful PDF format
 
-THIS IS A WORK IN PROGRESS BUT IT IS VERY USABLE
+**THIS IS A WORK IN PROGRESS BUT IT IS VERY USABLE**
 
 Please try it out and file feature requests and bug reports. PRs welcome. The author often hangs out as 'tbrowder' on IRC channel `#raku`.
 
@@ -29,14 +29,42 @@ DESCRIPTION
 
 
 
-PDF::Writer is the "poor man's" word processor.
+**PDF::Writer** is the "poor man's" word processor. It can turn text files into pdf documents now, with the ability for the user to control many aspects of the document including:
+
+  * font (standard PostScript fonts)
+
+  * font size
+
+  * margins
+
+  * paper (Letter, A4, etc.)
+
+  * page numbering
+
+  * doc title in bottom margin
+
+  * underlining
+
+  * user configuration file using TOML formats
+
+On the list of forthcoming features are:
+
+  * line numbering for code printouts
+
+  * line wrapping for paragraphs
+
+  * line truncation
+
+  * Raku pod to PDF
+
+  * Raku pod to PDF with custom formatting
 
 CREDITS
 =======
 
 
 
-This project could not exist without all the many contributors to Raku since its begginning by Larry Wall, including the fine module `PDF::API6` by David Warring.
+This project could not exist without all the many contributors to Raku since its beginning by Larry Wall, including the fine module `PDF::API6` by David Warring.
 
 AUTHOR
 ======
