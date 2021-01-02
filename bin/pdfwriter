@@ -68,6 +68,10 @@ class Doc {...}
 my $doc = Doc.new;
 
 class Doc {
+    # doc attrs that depend upon PDF::API6
+    has $.Page;
+    has $.Font:
+
     # doc attrs with defaults:
     has $.font  is rw = Courier;
     has $.size  is rw = 9.5;
@@ -193,10 +197,10 @@ if $pod {
 
 # some default settings to get started
 # TODO define a page class to hold such things
-my $height = 11 * 72;
-my $width = 8.5 * 72;
+$doc.height = 11 * 72;
+$doc.width = 8.5 * 72;
 
-my $pdf = PDF::API6.new;
+$doc.pdf = PDF::API6.new;
 if $ifil ~~ /:i pdf $/ {
     die "FATAL: Not attempting to read a file with name ending in 'pdf': $ifil ";
 }
@@ -209,45 +213,45 @@ if $debug {
 
 # GLOBAL VALUES =====================================
 # Set the default page size for all pages
-$pdf.media-box = $doc.paper;
+$doc.pdf.media-box = $doc.paper;
 
 # Use a standard PDF core font
-my $Font = $pdf.core-font: :font($doc.font); #, :weight<Bold>;
+$doc.Font = $doc.pdf.core-font: :font($doc.font); #, :weight<Bold>;
 # default size
 
 my @lines = $ifil.IO.lines;
 
-text2pdf $pdf, @lines, :$doc, :$debug;
+text2pdf @lines, :$doc, :$debug;
 
 # Save the new PDF
-$pdf.save-as($ofil);
+$doc.pdf.save-as($ofil);
 say "See file '$ofil'";
 
 ##### subroutines #####
-sub text2pdf($pdf, @lines, :$doc, :$debug) {
+sub text2pdf(@lines, :$doc, :$debug) {
     # line-by-line (the original method
 
     # for now we just need a conversion to pdf
     # determine how many pages:
-    my $lines-per-page = (($height - ($doc.top - $doc.bottom)) / $doc.leading).floor;
+    my $lines-per-page = (($doc.height - ($doc.top - $doc.bottom)) / $doc.leading).floor;
     my $npages = (@lines.elems / $lines-per-page).ceiling;
 
     # Add a blank page to start
-    my $page = $pdf.add-page();
+    my $page = $doc.pdf.add-page();
     my $x  = $doc.left;
-    my $y0 = $height - $doc.top - $doc.leading;
+    my $y0 = $doc.height - $doc.top - $doc.leading;
     my $y  = $y0;
     my $pnum      = 1; # for page numbering and control
     my $pnumbered = 0; # for page numbering and control
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            .font = $Font, $doc.size;
+            .font = $doc.Font, $doc.size;
             .text-position = $x, $y;
             .say($line);
         }
         if $doc.underline {
-            my $xx = $width - $doc.right;
+            my $xx = $doc.width - $doc.right;
             $page.graphics: {
                 # automatically protects with a Save/Restore
                 # need thinnest line from $x to $width-$right
@@ -272,13 +276,13 @@ sub text2pdf($pdf, @lines, :$doc, :$debug) {
             }
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
-                .font = $Font, $doc.size;
+                .font = $doc.Font, $doc.size;
                 .text-position = $x, $yy;
                 .say($pp);
             }
 
             # start a new page
-            $page = $pdf.add-page();
+            $page = $doc.pdf.add-page();
             ++$pnum;
             # reset y
             $y  = $y0;
@@ -300,7 +304,7 @@ sub text2pdf($pdf, @lines, :$doc, :$debug) {
         }
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
-            .font = $Font, $doc.size;
+            .font = $doc.Font, $doc.size;
             .text-position = $x, $yy;
             .say($pp);
         }
@@ -354,7 +358,7 @@ sub make-text-by-pages($pdf, @lines, :$debug) {
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            .font = $Font, $size;
+            .font = $doc.Font, $size;
             .text-position = $x, $y;
             .say($line);
         }
@@ -367,7 +371,7 @@ sub make-text-by-pages($pdf, @lines, :$debug) {
             my $pp = "Page $pnum of $npages";
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
-                .font = $Font, $size;
+                .font = $doc.Font, $size;
                 .text-position = $x, $yy;
                 .say($pp);
             }
@@ -389,7 +393,7 @@ sub make-text-by-pages($pdf, @lines, :$debug) {
         my $pp = "Page $pnumbered of $npages";
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
-            .font = $Font, $size;
+            .font = $doc.Font, $size;
             .text-position = $x, $yy;
             .say($pp);
         }
