@@ -9,7 +9,6 @@ constant CoreFont = PDF::Content::Font::CoreFont;
 use Text::Utils :ALL;
 use Config::TOML;
 
-use lib <./lib>;
 use PDF::Writer;
 
 my %config; # toml hash
@@ -58,8 +57,6 @@ if not ($ifil.IO.f and $ifil.IO.r) {
     die "FATAL: Input file '$ifil' cannot be read.";
 }
 
-#enum Paper <Letter Legal A4 A5>; # this enum is already defined in PDF::API6
-
 my $text      = 1;
 my $pod       = 0;
 my $debug     = 0;
@@ -67,7 +64,6 @@ my $verbose   = 0;
 my $toml;
 
 my $doc = Doc.new;
-
 
 for @*ARGS {
     # options
@@ -184,109 +180,13 @@ if $debug {
 # GLOBAL VALUES =====================================
 # Set the default page size for all pages
 $doc.Pdf.media-box = $doc.paper;
-
-
-#$doc.Font = $doc.Pdf.core-font(:family<Courier>); #, :weight<Bold>;
-my $Font = $doc.Pdf.core-font(:family($doc.font)); #, :weight<Bold>;
-my $Size = $doc.size;
-
-# default size
+$doc.Font = $doc.Pdf.core-font(:family($doc.font)); #, :weight<Bold>;
+$doc.Size = $doc.size;
 
 my @lines = $ifil.IO.lines;
 
-text2pdf @lines, :$doc, :$Font, :$Size, :$debug;
+text2pdf @lines, :$doc, :$debug;
 
 # Save the new PDF
 $doc.Pdf.save-as($ofil);
 say "See file '$ofil'";
-
-##### subroutines #####
-
-=finish
-# time trials showed no significant time savings by processing a page of text for four-page docs
-sub make-text-by-pages($pdf, @lines, :$debug) {
-    # page-by-page (an optimization)
-
-    # determine how many pages:
-    my $lines-per-page = (($height - ($top - $bottom)) / $line-spacing).floor;
-    my $npages = (@lines.elems / $lines-per-page).ceiling;
-
-    my @pages;
-    my $str = '';
-
-    my $pn     = 0;
-    my $nlines = 0;
-    for @lines -> $line {
-        ++$nlines;
-        if $nlines > $lines-per-page {
-            # put the string of page text away
-            @pages.push: $str;
-            ++$pn;
-            # reinitialize
-            $nlines = 0;
-            $str = '';
-        }
-        $str ~= $line;
-    }
-    if $str {
-        @pages.push: $str;
-    }
-    if @pages.elems != $npages {
-        die "FATAL: \$npages ($npages) != \@pages.elems ({@pages.elems})";
-    }
-
-    # now convert the pages of text to PDF
-
-    # Add a blank page to start
-    my $page = $pdf.add-page();
-    my $x  = $left;
-    my $y0 = $height - $top - $line-spacing;
-    my $y  = $y0;
-    my $pnum      = 1; # for page numbering and control
-    my $pnumbered = 0; # for page numbering and control
-    for @lines -> $line {
-        # add the line's text to the page
-        $page.text: {
-            .font = $doc.Font, $size;
-            .text-position = $x, $y;
-            .say($line);
-        }
-
-        $y -= $line-spacing;
-        if $y <= $bottom {
-            note "DEBUG: numbering page $pnum of $npages" if $debug;
-            # add a page number
-            ++$pnumbered;
-            my $pp = "Page $pnum of $npages";
-            my $yy = 36; # 1/2 inches from the bottom
-            $page.text: {
-                .font = $doc.Font, $size;
-                .text-position = $x, $yy;
-                .say($pp);
-            }
-
-            # start a new page
-            $page = $pdf.add-page();
-            ++$pnum;
-            # reset y
-            $y  = $y0;
-        }
-    }
-    # make sure the last page is numbered
-
-    note "DEBUG: finished page $pnum of $npages" if $debug;
-    note "DEBUG: actually numbered $pnumbered pages" if $debug and $pnumbered != $npages;
-    if $pnum <= $npages and $pnumbered != $npages {
-        # add a page number
-        ++$pnumbered;
-        my $pp = "Page $pnumbered of $npages";
-        my $yy = 36; # 1/2 inches from the bottom
-        $page.text: {
-            .font = $doc.Font, $size;
-            .text-position = $x, $yy;
-            .say($pp);
-        }
-    }
-    note "DEBUG: have now numbered $pnumbered pages" if $debug and $pnumbered == $npages;
-
-} # make-text-by-pages
