@@ -10,8 +10,9 @@ enum Style is export <Regular Italic Slant>;
 class Doc is export {
     # doc attrs that depend upon PDF::API6
     has $.Page is rw;
-    #has $.Font is rw;
     has $.Pdf  is rw;
+    has $.Font is rw;
+    has $.Size is rw;
 
     # all attrs below here may be defined in the TOML file
     # doc attrs with defaults:
@@ -36,6 +37,7 @@ class Doc is export {
     has $.weight        is rw;
     has $.truncate      is rw;
     has $.wrap          is rw;
+    # some defaults
     has $.leading       is rw = 9.5 * 1.25; # space between baselines
     has $.leading-ratio is rw = 1.25;       # used as font size times ratio equals leading distance
 
@@ -56,7 +58,7 @@ class Doc is export {
 }
 
 sub text2pdf(@lines, :$doc, :$debug,
-            :$Font, :$Size) is export {
+            ) is export {
     # line-by-line (the original method
 
     # for now we just need a conversion to pdf
@@ -74,7 +76,7 @@ sub text2pdf(@lines, :$doc, :$debug,
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            .font = $Font, $Size;
+            .font = $doc.Font, $doc.Size;
             .text-position = $x, $y;
             .say($line);
         }
@@ -104,7 +106,7 @@ sub text2pdf(@lines, :$doc, :$debug,
             }
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
-                .font = $Font, $Size;
+                .font = $doc.Font, $doc.Size;
                 .text-position = $x, $yy;
                 .say($pp);
             }
@@ -132,7 +134,7 @@ sub text2pdf(@lines, :$doc, :$debug,
         }
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
-            .font = $Font, $Size;
+            .font = $doc.Font, $doc.Size;
             .text-position = $x, $yy;
             .say($pp);
         }
