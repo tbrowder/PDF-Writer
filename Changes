@@ -1,6 +1,8 @@
 Revision history for PDF-Writer
 
 {{$NEXT}}
+
+0.0.3  2021-01-02T18:27:18-06:00
     - fixed use of fonts and an instance of the Doc class
     - moved most subs to the module
     - added rudimentary tests

@@ -1,4 +1,4 @@
-unit class PDF::Writer:ver<0.0.2>:auth<cpan:TBROWDER>;
+unit class PDF::Writer:ver<0.0.3>:auth<cpan:TBROWDER>;
 
 use Pod::To::Anything;
 use PDF::Content::Page :PageSizes;
