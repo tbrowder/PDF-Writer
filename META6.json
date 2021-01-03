@@ -6,10 +6,11 @@
   "build-depends": [
   ],
   "depends": [
-    "PDF",
+    "PDF:ver<0.4.5+>",
+    "PDF::Content:ver<0.4.8+>",
     "PDF::API6",
+    "PDF::Class",
     "PDF::Page",
-    "PDF::Content",
     "Pod::To::Anything",
     "Config::TOML",
     "Text::Utils"
