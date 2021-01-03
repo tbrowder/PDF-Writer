@@ -6,6 +6,9 @@
   "build-depends": [
   ],
   "depends": [
+    "PDF::API6",
+    "PDF::Page",
+    "PDF::Content",
     "Pod::To::Anything",
     "Config::TOML",
     "Text::Utils"
