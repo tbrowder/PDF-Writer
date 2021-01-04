@@ -1,5 +1,6 @@
 #!/usr/bin/env raku
 
+use PDF:ver<0.4.5+>;
 use PDF::Lite;
 
 use Text::Utils :ALL;

@@ -1,5 +1,6 @@
 unit module PDF::Writer:ver<0.0.5>:auth<cpan:TBROWDER>;
 
+use PDF:ver<0.4.5+>;
 use PDF::Lite;
 
 #enum Font is export <Courier Times Helvetica>;
