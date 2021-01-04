@@ -5,7 +5,7 @@ use PDF::Lite;
 my $pdf = PDF::Lite.new;
 my $page = $pdf.add-page;
 my $fnam = "Courier";
-my $font = $pdf.core-font($fnam);
+my $font = get-font $pdf, $fnam;
 
 for 0..3 -> $i {
     # put some text on the page
@@ -24,6 +24,16 @@ my $ofil = 'sample.pdf';
 $pdf.save-as: $ofil;
 say "Normal end. See new file '$ofil'.";
 
+sub get-font($pdf, $name, :$weight, :$style) {
+    given $name {
+        when /Courier/ { 
+            $pdf.core-font(:family<Courier>);
+        }
+        default {
+            $pdf.core-font(:family<Courier>);
+        }
+    }
+}
 
 
 

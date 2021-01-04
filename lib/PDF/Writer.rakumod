@@ -56,6 +56,11 @@ class Doc is export {
         $!leading       = $leading;
         $!leading-ratio = $!leading / $!size;
     }
+
+    method get-font($name) {
+    
+    }
+
 }
 
 sub text2pdf(@lines, :$doc, :$debug,
@@ -76,7 +81,9 @@ sub text2pdf(@lines, :$doc, :$debug,
 
     # Add a blank page to start
     my $page = $doc.Pdf.add-page();
-    my $Font = $page.core-font($doc.font);
+    my $font = $page.core-font(:family<Courier>);
+    #my $font = $doc.Pdf.core-font(:family<Helvetica>, :weight<Bold>, :Style<Italic>);
+    my $size = $doc.size.Num;
 
     my $x  = $doc.left;
     my $y0 = $doc.height - $doc.top - $doc.leading;
@@ -86,8 +93,7 @@ sub text2pdf(@lines, :$doc, :$debug,
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            my $font = .core-font($doc.font);;
-            .font = $font, $doc.size;
+            .font = $font, $size;
             .text-position = $x, $y;
             .say($line);
         }
@@ -117,15 +123,13 @@ sub text2pdf(@lines, :$doc, :$debug,
             }
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
-                my $font = .core-font($doc.font);;
-                .font = $font, $doc.size;
+                .font = $font, $size;
                 .text-position = $x, $yy;
                 .say($pp);
             }
 
             # start a new page
             $page = $doc.Pdf.add-page();
-            $Font = $page.core-font($doc.font);
             ++$pnum;
             # reset y
             $y  = $y0;
@@ -147,8 +151,7 @@ sub text2pdf(@lines, :$doc, :$debug,
         }
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
-            my $font = .core-font($doc.font);;
-            .font = $font, $doc.size;
+            .font = $font, $size;
             .text-position = $x, $yy;
             .say($pp);
         }
