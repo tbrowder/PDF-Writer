@@ -1,6 +1,7 @@
 Revision history for PDF-Writer
 
 {{$NEXT}}
+    - delete windows test
 
 0.0.5  2021-01-04T06:56:56-06:00
     - correct lots of font use errors
