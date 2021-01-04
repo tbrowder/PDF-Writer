@@ -2,6 +2,11 @@ Revision history for PDF-Writer
 
 {{$NEXT}}
 
+0.0.5  2021-01-04T06:56:56-06:00
+    - correct lots of font use errors
+    - fall back to an easier dependency
+    - temporary use of a fixed font: Courier
+
 0.0.4  2021-01-02T20:55:16-06:00
     - add missing deps
 
