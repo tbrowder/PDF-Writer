@@ -1,11 +1,8 @@
 unit class PDF::Writer:ver<0.0.4>:auth<cpan:TBROWDER>;
 
-use PDF:ver<0.4.5+>;
-use PDF::Content:ver<0.4.8+>;
-use Pod::To::Anything;
-use PDF::Content::Page :PageSizes;
+use PDF::Lite;
 
-enum Font is export <Courier Times Helvetica>;
+#enum Font is export <Courier Times Helvetica>;
 enum Weight is export <Bold>;
 enum Style is export <Regular Italic Slant>;
 
@@ -16,11 +13,13 @@ class Doc is export {
     has $.Font is rw;
     has $.Size is rw;
 
+    has $.ofil is rw;
+
     # all attrs below here may be defined in the TOML file
     # doc attrs with defaults:
-    has $.font  is rw = Courier;
+    has $.font  is rw = "Courier";
     has $.size  is rw = 9.5;
-    has $.paper is rw = Letter;
+    has $.paper is rw = 'Letter';
     has $.title is rw = 1;
 
     # margins
@@ -68,8 +67,17 @@ sub text2pdf(@lines, :$doc, :$debug,
     my $lines-per-page = (($doc.height - ($doc.top - $doc.bottom)) / $doc.leading).floor;
     my $npages = (@lines.elems / $lines-per-page).ceiling;
 
+=begin comment
+    $page.text: {
+        .font = $font, 12;
+        .say("howdy");
+    }
+=end comment
+
     # Add a blank page to start
     my $page = $doc.Pdf.add-page();
+    my $Font = $page.core-font($doc.font);
+
     my $x  = $doc.left;
     my $y0 = $doc.height - $doc.top - $doc.leading;
     my $y  = $y0;
@@ -78,7 +86,8 @@ sub text2pdf(@lines, :$doc, :$debug,
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            .font = $doc.Font, $doc.Size;
+            my $font = .core-font($doc.font);;
+            .font = $font, $doc.size;
             .text-position = $x, $y;
             .say($line);
         }
@@ -108,13 +117,15 @@ sub text2pdf(@lines, :$doc, :$debug,
             }
             my $yy = 36; # 1/2 inches from the bottom
             $page.text: {
-                .font = $doc.Font, $doc.Size;
+                my $font = .core-font($doc.font);;
+                .font = $font, $doc.size;
                 .text-position = $x, $yy;
                 .say($pp);
             }
 
             # start a new page
             $page = $doc.Pdf.add-page();
+            $Font = $page.core-font($doc.font);
             ++$pnum;
             # reset y
             $y  = $y0;
@@ -136,7 +147,8 @@ sub text2pdf(@lines, :$doc, :$debug,
         }
         my $yy = 36; # 1/2 inches from the bottom
         $page.text: {
-            .font = $doc.Font, $doc.Size;
+            my $font = .core-font($doc.font);;
+            .font = $font, $doc.size;
             .text-position = $x, $yy;
             .say($pp);
         }
