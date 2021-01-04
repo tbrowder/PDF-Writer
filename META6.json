@@ -6,6 +6,7 @@
   "build-depends": [
   ],
   "depends": [
+    "App::Prove6",
     "PDF::Lite",
     "Pod::To::Anything",
     "Config::TOML",
