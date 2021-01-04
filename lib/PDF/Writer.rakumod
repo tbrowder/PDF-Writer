@@ -1,4 +1,4 @@
-unit module PDF::Writer:ver<0.0.5>:auth<cpan:TBROWDER>;
+unit module PDF::Writer:ver<0.0.6>:auth<cpan:TBROWDER>;
 
 use PDF:ver<0.4.5+>;
 use PDF::Lite;
