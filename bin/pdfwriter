@@ -116,7 +116,7 @@ for @*ARGS {
         $doc.style = ~$0;
     }
     when /:i si <[ze]>* '=' (\S+) / {
-        $doc.size = ~$0;
+        $doc.size = +$0;
     }
     when /:i w <[eight]>* '=' (\S+) / {
         $doc.weight = ~$0;
