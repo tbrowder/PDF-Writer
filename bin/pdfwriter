@@ -36,7 +36,7 @@ if not @*ARGS.elems {
                           as needed
       config=F        - Where F is the name of a TOML file other than
                           the default location
-      verbose         - See more etails of the execution
+      verbose         - See more details of the execution
       debug           - For developer use
 
     Notes
