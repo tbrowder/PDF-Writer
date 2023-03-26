@@ -1,0 +1,126 @@
+%%!PS-Adobe-3.0
+%%Pages: (atend)
+%%PageOrder: Ascend
+save
+
+/Courier findfont
+10.0000 scalefont setfont
+%%PAGE: 1 1
+save
+gsave
+/Courier-Bold findfont
+7 scalefont setfont
+72.0000 763.2000 moveto
+(File: juvat3:pod6-configure-notes-from-damian-conway.ps      Page: 1) show
+72.0000 756.2000 moveto
+(Date: 2019-08-26) show
+grestore
+72.0000 710.0000 moveto
+() show
+72.0000 700.0000 moveto
+( The following text \\\(section *Damian's reply*\\\) is a verbatim quote from) show
+72.0000 690.0000 moveto
+( an e-mail [1] received from Damian Conway in response to a query for) show
+72.0000 680.0000 moveto
+( his view on legitimate values for pod configuration keys.) show
+72.0000 670.0000 moveto
+() show
+72.0000 660.0000 moveto
+( Note the verbatim text has been slightly edited by additional) show
+72.0000 650.0000 moveto
+( formatting for this Markdown document plus some minor typographical) show
+72.0000 640.0000 moveto
+( edits indicated by *[sic]*.) show
+72.0000 630.0000 moveto
+() show
+72.0000 620.0000 moveto
+( # Damian's reply) show
+72.0000 610.0000 moveto
+() show
+72.0000 600.0000 moveto
+( My intention was always that the meaning of adverbials in Perl 6 Pod) show
+72.0000 590.0000 moveto
+( should be exactly the same as everywhere else in Perl 6. Hence:) show
+72.0000 580.0000 moveto
+() show
+72.0000 570.0000 moveto
+( ```) show
+72.0000 560.0000 moveto
+( :a{}              ---> 'a' => %empty-hash) show
+72.0000 550.0000 moveto
+( :b\\\(\\\)              ---> 'b' => \\\(\\\)) show
+72.0000 540.0000 moveto
+( :c\\\(''\\\)            ---> 'c' => '') show
+72.0000 530.0000 moveto
+( :d[]              ---> 'd' => @empty-array) show
+72.0000 520.0000 moveto
+( :e<>              ---> 'e' => '') show
+72.0000 510.0000 moveto
+( :f{f=> 4, g=> ''} ---> 'f' => { 'f'=>4, 'g' => '' }) show
+72.0000 500.0000 moveto
+( ```) show
+72.0000 490.0000 moveto
+( So they are all perfectly valid, in my view.) show
+72.0000 480.0000 moveto
+() show
+72.0000 470.0000 moveto
+( As to whether they are *meaningful* or *useful*...that depends) show
+72.0000 460.0000 moveto
+( entirely on the actual key of the adverbial \\\(and sometimes, perhaps,) show
+72.0000 450.0000 moveto
+( on the block type they're attached to\\\).) show
+72.0000 440.0000 moveto
+() show
+72.0000 430.0000 moveto
+( I think the correct answer is that we should think of the values of) show
+72.0000 420.0000 moveto
+( these adverbials as being strictly typed, rather than coercively) show
+72.0000 410.0000 moveto
+( typed.) show
+72.0000 400.0000 moveto
+() show
+72.0000 390.0000 moveto
+( For example, the *:numbered* option should be thought of as having the) show
+72.0000 380.0000 moveto
+( underlying value type of Bool, or in actual Perl 6 notation [sic]:) show
+72.0000 370.0000 moveto
+() show
+72.0000 360.0000 moveto
+(     subset Numbered of Pair where *.value ~~ Bool;) show
+72.0000 350.0000 moveto
+() show
+72.0000 340.0000 moveto
+( So any argument other than a strict Bool value should be a) show
+72.0000 330.0000 moveto
+( compile-time error.  Hence:) show
+72.0000 320.0000 moveto
+() show
+72.0000 310.0000 moveto
+(     =head2 :numbered{}) show
+72.0000 300.0000 moveto
+(     =head2 :numbered[]) show
+72.0000 290.0000 moveto
+(     =head2 :numbered<>) show
+72.0000 280.0000 moveto
+(     =head2 :numbered\\\(\\\)) show
+72.0000 270.0000 moveto
+(     =head2 :numbered\\\(''\\\)) show
+72.0000 260.0000 moveto
+(     =head2 :numbered{f=>4, g=>''}) show
+72.0000 250.0000 moveto
+() show
+72.0000 240.0000 moveto
+( ...should all die with something like:) show
+72.0000 230.0000 moveto
+() show
+72.0000 220.0000 moveto
+(     Invalid :numbered option. Expected Bool value but found Hash: {}) show
+72.0000 210.0000 moveto
+(     Invalid :numbered option. Expected Bool value but found Array: []) show
+72.0000 200.0000 moveto
+(     Invalid :numbered option. Expected Bool value but found String: <>) show
+72.0000 190.0000 moveto
+(     Invalid :numbered option. Expected Bool value but found List: \\\(\\\)) show
+72.0000 180.0000 moveto
+(     Invalid :numbered option. Expected Bool value but found String: '') show
+72.0000 170.0000 moveto

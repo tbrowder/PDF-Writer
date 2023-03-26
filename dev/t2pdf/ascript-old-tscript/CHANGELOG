@@ -1,0 +1,9 @@
+version 1.8
+	added flag to turn off line wrap
+	added user-defined margins
+	header position now independent of top margin
+	line numbers start at left margin
+	continuation character at left of left margin unless
+		line numbering is in effect--in that case it
+		is to the right of the line number field
+

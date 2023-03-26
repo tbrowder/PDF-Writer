@@ -1,0 +1,102 @@
+# For all files:
+
+# Note all text in any input file on a line from a '#' (pound or hash
+# symbol, formally: octothorp) is ignored as are all blank lines.
+
+# Year conversions:
+#   {1999}  <= year number in curly braces results in a cardinal
+#              number (1, 2, etc.)
+#   [1999]  <= year number in square brackets results in an ordinal
+#              number (1st, 2nd, etc.)
+
+# There are three types of input files for users:
+#   1. event files:
+#        'birthdays.txt'
+#        'anniversaries.txt'
+#        'other-events.txt'
+#
+#   These files have an event on a single line in one of the following
+#     three formats:
+#        day month text.... 
+#        day month text.... [yyyy]
+#        day month text.... {yyyy}
+#
+#     where 'day' is the day of the month (1..31), 'month' is the
+#     standard three-letter abbreviation of the month of the year
+#     (jan...dec), and 'yyyy' is the optional year of the originsl
+#     event (birth, wedding, etc.) if you want to
+#     see the number of years since the original event.
+#     The month abbreviations are not case-sensitive.
+#     Empty year brackets will be ignored, but a missing part
+#     of either pair will be an error. Note neither character
+#     is allowed in the preceding text; otherwise, there
+#     is no limitation for the text portion.
+#
+#   2. other data
+#        'front-cover-words.txt'
+#        'monthly-quotes.txt'
+#=============================================================
+# File: birthdays.txt
+# File: anniversaries.txt
+# File: other-events.txt
+#=============================================================
+
+# These files contains entries for birthdays, anniversaries, or
+# other events for the personalized wall calendar. The only 
+# difference in the three files is in the formatting and color
+# on the calendar. See the example calendar for details. For any 
+# event realize too much data will overflow and ruin the final
+# appearance.
+
+ 6 jan Willi {1950}        # a birthay
+13 sep H. & Preston {1997} # a wedding anniversary
+ 8 oct Comp. Tech {2006}   # an event
+
+#=============================================================
+# File: front-cover-words.txt
+#=============================================================
+
+# This file contains the front cover personalization for the
+# personalized wall calendar.
+
+# The following two or more lines will be typeset on the front cover
+# of the wall calendar AFTER the identifying title:
+#
+#     The Year YYYY
+#
+# The first line will be in bold and the second line (and following lines)
+# will be typeset in a regular and smaller typeface.
+
+A Special Calendar for Special People
+To Nana and Papa with love, from the Jones Family
+On the occasion of your 50th wedding anniversary
+
+#=============================================================
+# File: monthly-quotes.txt
+#=============================================================
+# This file contains monthly quotations for the personalized wall
+# calendar (there must be exactly 12 lines, one for each month).
+# Note that the quotations are one per line and the longest one (122
+# characters) is as long as my calendar format can handle (one printed
+# line).  Note also that they are printed on each sheet in top to
+# bottom order from January through December.
+
+# The following Bible verses are from the King James Version (KJV).
+# They were chosen by my dear late mother-in-law, Grace Lee, who was 
+# the person for whom I started this program near the end of the
+# last century. They are used by default. If you do not want them,
+# merely provide an empty 'monthly-quotes.txt' file with your
+# other input files.
+
+For by me [the Lord] thy days shall be multiplied, and the years of thy life shall be increased. (Proverbs 9:10)
+The fear of the Lord is the beginning of knowledge, but fools despise wisdom and instruction.  (Proverbs 1:7)
+Trust in the Lord with all thine own heart and lean not unto thine own understanding.  (Proverbs 3:5)
+In all thy ways acknowledge him and he shall direct thy paths.  (Proverbs 3:6)
+Keep company with the wise and you will become wise.  (Proverbs 13:20)
+The road the righteous travel is like the sunrise, getting brighter and brighter until daylight has come. (Proverbs 4:18)
+Plan carefully what you do and whatever you do will turn out right.  (Proverbs 4:26)
+Let love and faithfulness never leave you; ...write them on the tablet of your heart.  (Proverbs 3:3)
+Hatred stirs up dissension, but love covers over all wrongs.  (Proverbs 10:12)
+Be generous, and you will be prosperous.  Help others, and you will be helped.  (Proverbs 11:25)
+A heart at peace gives life to the body....  (Proverbs 14:30)
+A gentle answer turns away wrath, but a harsh word stirs up anger.  (Proverbs 15:1)

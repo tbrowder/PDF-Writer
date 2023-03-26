@@ -1,0 +1,32 @@
+User defined margins.
+
+Word wrap (including proportional fonts).
+  hint: Text::More has a good line-wrap func, maybe use it
+
+Formal page numbering.
+
+Paragraph fill and left justify.
+
+Super- and sub-scripts.
+
+Include PostScript graphics.
+
+Use of symbol font.
+
+Use a user-defined config file at ~/.tscript.config (see
+  work at rel-tool)
+
+Handle more page sizes:
+  A4
+  2' x 3' poster
+  ...
+ 
+  need a better page def and setup system
+
+Allow different user units:
+  mm
+  cm
+
+Allow user-defined spaces per tab
+
+Check cdt;cd myps/perl6 for "[ ... cleartomark use," add to tscript

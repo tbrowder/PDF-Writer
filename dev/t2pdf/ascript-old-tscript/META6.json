@@ -1,0 +1,26 @@
+{
+  "authors": [
+    "Tom Browder"
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+  ],
+  "description": "",
+  "license": "NOASSERTION",
+  "name": "ASsubs",
+  "perl": "6.d",
+  "provides": {
+    "ASclasses": "lib/ASclasses.pm6",
+    "ASsubs": "lib/ASsubs.pm6",
+    "ASvars": "lib/ASvars.pm6"
+  },
+  "resources": [
+  ],
+  "source-url": "https://de8/master-git-private-repos/tbrowde-home.git",
+  "tags": [
+  ],
+  "test-depends": [
+  ],
+  "version": null
+}

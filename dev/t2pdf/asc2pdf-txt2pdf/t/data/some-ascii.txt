@@ -1,0 +1,24 @@
+DEBUG: in sub fill-users...
+Data (user, cpwd) for realm 'canterburycircle.us':
+Adair      9qsHmvvP
+Baldwin    whXwsP74
+Bender     NLxW734p
+Brennan    Wnsq39jz
+Browder    qq1234zz
+Buckland   tpWHz79x
+Callaghan  wJw4btTt
+Cooke      qqbPWvv3
+Dutram     MzXz3VFf
+Erstad     VxJ9HnrK
+Hanson     WMh9d9jw
+Kennedy    Nhm4dMJW
+Lamonica   njwRWX9z
+Landon     RzL49vws
+Mills      zrXKfsL7
+O'Connor   xjJLfH4t
+Oelke      xvzLxL9H
+Reilley    9jsCmdF4
+Reyher     RzPP7vqL
+VanNess    Tbp3Xfdf
+Wright     whd7kwMf
+Zargari    9FmbffPV

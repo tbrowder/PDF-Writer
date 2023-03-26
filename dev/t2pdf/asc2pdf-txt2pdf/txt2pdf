@@ -1,0 +1,574 @@
+#!/usr/bin/env perl6
+
+# this is Tom Browder's version of "enscript." It was developed without
+# any reference to the internals of the original program.
+
+use Font::AFM; # Raku version
+use Text::Utils :ALL;
+
+use lib <.>;
+use TVars;
+use TClasses;
+
+# GLOBAL VARS (others in module TVars)
+my $tmpbuf; # a variable length string, need to treat as an array of chars
+my $tbuf = Tmpbuf.new; # may replace $tmpbuf at some point
+my $portrait   = Portrait.new;
+my $landscape  = Landscape.new;
+
+my $doc = PSDoc.new;
+
+my $hostname = %*ENV<TMB_MAKE_HOST> // "UNKNOWN";
+my $version = '3.1';
+my $usage = "Usage: $*PROGRAM-NAME [options...] <ascii text file> (use -h option for extended help)";
+if !@*ARGS.elems {
+    say $usage;
+    exit 0;
+}
+
+get-args;
+
+die "FATAL: No input file named.\n" if !$infile;
+if !$outfile-pdf {
+    # create the default name
+    $outfile-pdf = $infile ~ '.pdf';
+}
+
+set-vars-after-input;
+
+if $debug {
+    say "debug:";
+    say "  output pdf file name: '$outfile-pdf'";
+    say "  output ps  file name: '$outfile-ps'";
+
+    =begin comment
+    say "  doc page-num = ", $doc.page-num;
+    $doc.page-num += 1;
+    say "  doc page-num = ", $doc.page-num;
+    ++$doc.page-num;
+    say "  doc page-num = ", $doc.page-num;
+    =end comment
+}
+
+if $word-process {
+    #do_word-process();
+    die "word processing: what now?";
+}
+
+$afm = Font::AFM.new: :name($font-name);
+if !$afm.IsFixedPitch {
+    say qq:to/HERE/;
+      FATAL:  Font '$font-name' is not mono-spaced.   Unable to handle
+        proportional fonts yet. Use the Courier family.
+    HERE
+    exit;
+}
+else {
+    say "Using mono-spaced font '$font-name'.";
+    $char-width = $afm.stringwidth: $SPACE, $font-size;
+}
+
+# no more below this point if word processing???
+
+=begin comment
+#== use better handling closer to the output
+# allow space for line numbers */
+if line-number-flag == True {
+    portrait.xll  -= 6 * char-width;
+    landscape.xll -= 6 * char-width;
+}
+# adjust for 1 more character to allow for continuation character
+if $line-number-flag == False {
+    $portrait.xll  -= 1 * $char-width;
+    $landscape.xll -= 1 * $char-width;
+}
+=end comment
+
+my $fpout = open $outfile-ps, :w;
+
+start-ps-doc $fpout, $doc;
+
+# setup page format
+if $doc.landscape {
+    $fpout.printf: "%.4f %.4f translate\n", 8.5 * $IN2PT, 0.0;
+    $fpout.say:    '90 rotate';
+    $xll = $landscape.xll;
+    $yll = $landscape.yll;
+    $xur = $landscape.xur;
+    $yur = $landscape.yur;
+    $vsize = $yur - $yll;
+    $hsize = $xur - $xll;
+}
+else {
+    $xll = $portrait.xll;
+    $yll = $portrait.yll;
+    $xur = $portrait.xur;
+    $yur = $portrait.yur;
+    $vsize = $yur - $yll;
+    $hsize = $xur - $xll;
+}
+
+$chars-per-line = ($hsize / $char-width).Int + 1; # adjust to get 80 chars per line for 10 pt Courier
+$max-line-length = $hsize + 1 * $char-width;
+if $line-number-flag == True {
+    $max-line-length += 6 * $char-width;
+}
+else {
+    $max-line-length += 1 * $char-width;
+}
+
+# set up font
+$fpout.printf: "/%s findfont\n", $font-name;
+$fpout.printf: "%.4f scalefont setfont\n", $font-size;
+
+$vpos = $yur;
+
+# start the first page of the document
+start-ps-page $fpout, $doc;
+
+show-page-header $fpout, $doc if $header-flag;
+
+for $infile.IO.lines.kv -> $linenum is copy, $line is copy {
+    once next; # clever way to get linenum indexed from 1 (per Zoffix)
+    my $wrap-flag = False;
+    if $line-number-flag == True && $line ~~ / '/* END_PRINT */' / {
+	last;
+    }
+    ++$line-number; # for line numbering option (-n)
+    $vpos -= $font-size;
+    if $line ~~ / $FF / || $line ~~ / $FF2 / {
+	$form-feed = True;
+    }
+
+    # do some initial line handling:
+    #   check for back-slashes
+    #   change tabs to spaces
+    #   protect parens for PostScript
+    $line = prep-line $line, $linenum;
+
+    # use a tmp buffer to construct output line
+    $tmpbuf = $SPACE; # .substr-rw(0, 1) = $SPACE;
+    $tbuf.buf = $SPACE;
+
+    WRAP_LINE:
+
+    # DO WE NEED A NEW PAGE??
+    if $vpos < $yll || $form-feed {
+        end-ps-page $fpout, $doc;
+        start-ps-page $fpout, $doc; 
+
+        # what about the following, needed?? TODO
+	=begin comment
+	if $doc.landscape {
+	    fprintf( fpout, "%.4f %.4f translate\n", 8.5 * IN2PT, 0. );
+	    fprintf( fpout, "90 rotate\n" );
+	}
+	=end comment
+
+        show-page-header $fpout, $doc if $header-flag;
+
+        # resetting currrent line back to the top on the new page
+	$vpos = $yur - $font-size;
+        # resetting currrent line number to 0 for the new page
+	$linenum = 0;
+	$form-feed = False;
+	if $line ~~ / $FF / {
+	    next; # don't print FF symbol
+	}
+    }
+
+    ++$linenum;
+    $fpout.printf: "%.4f %.4f moveto\n", $xll, $vpos;
+
+    # set up output line -- protect parentheses, replace tabs, etc.
+    my $len = $line.chars;
+    my $current-line-length = 0;
+    
+    if $line-number-flag == False {
+	$current-line-length = 1 * $char-width;
+    }
+    elsif $line-number-flag == True {
+	if $wrap-flag == False {
+	    $tmpbuf = sprintf "%5d ", $line-number;
+            $tbuf.buf = sprintf "%5d ", $line-number;
+	    # $current-line-length += 6 * get_char-width($font-id, $SPACE);
+	}
+	else {
+	    my $s = '     >';
+	    $tmpbuf.substr-rw(1, $s.chars) = $s;
+            $tbuf.replace($s, 1);
+	}
+	$current-line-length = 6 * $char-width; # temp fix -- Courier only
+    }
+
+    # use $line.substr-rw for the string manipulation (see docs, type Str)??
+
+    # new Perl 6 code
+    LOOP1:
+    loop (my $i = 0; $i < $len; ++$i) { # save 0 char for continuation line flag
+	if $line.substr($i, 1) eq '\t' {
+
+            # insert the appropriate number of spaces
+	    #$spaces = $tabspaces - ($i % $tabspaces); # what's the intent here??
+	    my $spaces = $tabspaces;
+	    LOOP2:
+	    loop (my $k = 0; $k < $spaces; ++$k) {
+		$tmpbuf ~= $SPACE;
+		$current-line-length = $tmpbuf.chars * $char-width; # temp fix -- Courier only
+		if $line-wrap == True && $current-line-length >= $max-line-length {
+		    # what to do?? no goto in Perl 6
+		    die "FATAL: line number $linenum is too long ($current-line-length >= $max-line-length)";
+
+		    =begin comment
+		    $tmpbuf.substr-rw($j, 1) = '\0'; # Perl 6 (trim string)?
+		    $fpout.printf: "(%s) show\n", $tmpbuf;
+
+		    # what to  do? $line below was cptr!!
+		    #$line += $i + 1; # $i hasn't been incremented yet
+
+		    if $line-number-flag == False {
+			$tmpbuf ~= '>';
+		    }
+		    $vpos -= $font-size;
+		    $wrap-flag = True;
+		    goto WRAP_LINE;
+		    =end comment
+		}
+	    }
+	    next LOOP1;
+	}
+
+	if $line.substr($i, 1) eq '(' || $line.substr($i, 1) eq ')' || $line.substr($i, 1) eq '\\' {
+	    $tmpbuf ~= '\\';
+	}
+        if $debug > 1 {
+            say qq:to/HERE/;
+            DEBUG:
+              line:   '$line'
+              tmpbuf: '$tmpbuf'
+              i: $i
+            HERE
+        }
+	$tmpbuf ~= $line.substr($i, 1);
+
+	$current-line-length = $tmpbuf.chars * $char-width; # temp fix -- Courier only
+	if $line-wrap == True && $current-line-length >= $max-line-length {
+	    # what to do?? no goto in Perl 6
+	    die "FATAL: line number $linenum is too long ($current-line-length >= $max-line-length)";
+	    =begin comment
+	    $tmpbuf.substr-rw($j, 1) = '\0';
+	    $fpout.printf: "(%s) show\n", $tmpbuf;
+
+            # what is the following $line? was cptr
+	    #$line += $i + 1; # $i hasn't been incremented yet
+
+	    if $line-number-flag == False {
+		$tmpbuf.substr-rw(0, 1) = '>';
+	    };
+	    $vpos -= $font-size;
+	    $wrap-flag = True;
+	    next WRAP_LINE;
+	    =end comment
+	}
+    }
+
+    $tmpbuf ~= $SPACE;
+    $tmpbuf .= trim-trailing;
+
+    $fpout.printf: "(%s) show\n", $tmpbuf;
+
+}
+
+end-ps-page $fpout, $doc;
+end-ps-doc $fpout, $doc;
+$fpout.close;
+
+write-pdf $outfile-ps, $outfile-pdf;
+
+say "Normal end.  See output files:";
+say "  $outfile-ps" if $outfile-ps.IO.f;
+say "  $outfile-pdf";
+
+exit 0;
+
+##### SUBROUTINES #####
+sub write-pdf($psf, $pdf) {
+    my $cmd = "ps2pdf $psf $pdf";
+    run $cmd.words;
+    # delete the ps file if all went well
+    if !$save-ps && $pdf.IO.f {
+	unlink $psf;
+    }
+}
+
+sub wrap-line($line is copy, 
+              $max-length    # inches
+              --> List) {
+    # this function will return a list of the wrapped lines
+    # the actual length depends on the fixed-font size
+    # since this function only works for source input, not
+    # word processing 
+    
+}
+
+sub help() {
+    print qq:to/HERE/;
+    $usage
+
+    tscript, version $version; converts an ASCII text file to PostScript
+      and then pdf.
+
+      Defaults are: $default-font-size point Courier font; portrait; {$default-margins}-inch margins;
+        and a header line with file information, date, and page number.
+
+      Lines are wrapped if they exceed the allowable line length and
+        the continuation lines are marked with a leading '>'.
+
+      Note: 10 point Courier will allow 80 characters on a line with
+               the default margins.
+
+    Options:
+          -h  extended help
+          -F  list font names
+          -B  omit header (file name, date, and page number)
+          -r  rotate (landscape, default is portrait)
+          -n  print line numbers (up to 99,999)        [NYI]
+          -L  omit line wrap
+          -w  word processor                           [NYI]
+          -d  debug (for developers
+          -s  don't delete intermediate PS file
+
+          -t=<number of spaces per tab> (8 is default)
+          -o=<output file name> (must have a .pdf suffix)
+          -f=<font name> (see the -F option)
+          -p=<font point size>
+          -LM=<left margin> (in inches), default 1.0 in
+          -RM=<right margin> (in inches), default 1.0 in
+          -TM=<top margin> (in inches), default 1.0 in
+          -BM=<bottom margin> (in inches), default 1.0 in
+
+    HERE
+    exit 0;
+}
+
+sub show-font-names() {
+    print q:to/HERE/;
+    tscript font names:
+
+      Proportional:
+      ------------
+      Times-Roman
+      Times-Bold
+      Times-Italic
+      Times-BoldItalic
+      Helvetica
+      Helvetica-Bold
+      Helvetica-Oblique
+      Helvetica-BoldOblique
+
+      Fixed-pitch (monospace):
+      -----------------------
+      Courier       [default]
+      Courier-Bold
+      Courier-Oblique
+      Courier-BoldOblique
+    HERE
+    exit 0;
+}
+
+sub get-args {
+    my $na = +@*ARGS;
+    my $ii = 0;
+    for @*ARGS -> $arg is copy {
+	++$ii; # counting args from 1
+	my $val = "";
+
+	my $idx = $arg.index('=');
+	if $idx.defined  {
+	    $val = $arg.substr($idx+1);
+	    $arg .= substr(0, $idx);
+	}
+
+	if $arg eq "-h" {
+	    help();
+	    print qq:to/HERE/;
+	    HERE
+
+	    exit;
+	}
+	elsif $arg eq "-w" {
+	    die "FATAL: -w (word processor) option is not yet available.\n";
+	    $word-process = True;
+	}
+	elsif $arg eq "-F" {
+	    show-font-names();
+	}
+	elsif $arg eq "-d" {
+	    $debug = True;
+            $save-ps = True;
+	}
+	elsif $arg eq "-s" {
+            $save-ps = True;
+	}
+	elsif $arg eq "-LM" {
+            $left-margin = $val;
+	}
+	elsif $arg eq "-RM" {
+	    $right-margin = $val;
+	}
+	elsif $arg eq "-TM" {
+	    $top-margin = $val;
+	}
+	elsif $arg eq "-BM" {
+	    $bottom-margin = $val;
+	}
+	elsif $arg eq "-f" {
+	    $font-name = $val;
+	}
+	elsif $arg eq "-p" {
+	    $font-size = $val;
+	}
+	elsif $arg eq "-o" {
+            if $val !~~ /\.pdf$/ {
+                say "FATAL:  The output file name must have a '.pdf' suffix.";
+                say "        You entered: '$val'";
+                exit;
+            }
+	    $outfile-pdf = $val;
+	}
+	elsif $arg eq "-t" {
+	    $tabspaces = $val;
+	}
+	elsif $arg eq "-B" {
+	    $header-flag = False;
+	}
+	elsif $arg eq "-r" {
+            $doc.landscape = True;
+	}
+	elsif $arg eq "-L" {
+	    $line-wrap = False;
+	    $doc.line-wrap = False;
+	}
+	elsif $arg eq "-n" {
+	    $line-number-flag = True;
+	    $tmpbuf-start = 6; # allows 5 spaces for line number plus trailing space
+	}
+	elsif $ii == $na {
+	    if $arg ~~ /^ '-' / {
+		die "Last argument must be a file name, it cannot begin with a hyphen.\n";
+	    }
+	    $infile = $arg;	# last arg - default for now
+	}
+	else {
+	    die "Unknown option $ii: '$arg'.";
+	}
+    }
+}
+
+sub set-vars-after-input {
+    $outfile-ps = $outfile-pdf;
+    $outfile-ps ~~ s:i/\.pdf$/\.ps/;
+
+    # get system date
+    $date-string = Date.today;
+    $portrait.xll  = $left-margin    * $IN2PT;
+    $portrait.yll  = $bottom-margin  * $IN2PT;
+    $portrait.xur  =  8.5 * $IN2PT - $right-margin * $IN2PT;
+    $portrait.yur  = 11.0 * $IN2PT - $top-margin * $IN2PT;
+
+    $landscape.xll = $left-margin    * $IN2PT;
+    $landscape.yll = $bottom-margin  * $IN2PT;
+    $landscape.xur = 11.0 * $IN2PT - $right-margin * $IN2PT;
+    $landscape.yur =  8.5 * $IN2PT - $top-margin * $IN2PT;
+
+    $font-name = $default-font-name if !$font-name;
+    $font-size = $default-font-size if !$font-size;
+
+    if !$doc.landscape {
+	$page-top  = 11.0 * $IN2PT;
+	$page-left = $portrait.xll;
+    }
+    else {
+	$page-top  = 8.5 * $IN2PT;
+	$page-left = $landscape.xll;
+    }
+}
+
+sub prep-line($line is copy, $linenum --> Str) {
+    # do some initial line handling on the input line
+    #   check for back-slashes
+    #   change tabs to spaces
+    #   protect parens for PostScript
+
+    # slashes
+    my $has-slashes = index $line, '\\';
+    if $has-slashes {
+        say "WARNING: Input line $linenum has back-slashes, results may be unexpected.";
+    }
+
+    # tabs
+    my $has-tabs = index $line, '\t';
+    if $has-tabs {
+        say "DEBUG: Input line $linenum has tabs." if $debug;
+        my $spaces = ' ' x $tabspaces;
+        $line ~~ s:g/\\t/$spaces/;
+    }
+
+    # parens '(' and ')'
+    $line ~~ s:g/\(/\\\(/;
+    $line ~~ s:g/\)/\\\)/;
+
+    $line .= trim-trailing;
+    return $line;
+}
+
+sub end-ps-page($fh, PSDoc $d) {
+    $fh.say: "showpage";
+    $fh.say: "restore";
+    $fh.say: "%%ENDPAGE";
+}
+
+sub show-page-header($fh, PSDoc $d) {
+    $fh.say: "gsave";
+    $fh.printf: "/%s findfont\n", "Courier-Bold";
+    $fh.printf: "%d scalefont setfont\n", 7;
+    $fh.printf: "%.4f %.4f moveto\n", $page-left, $page-top - 0.4 * $IN2PT;
+
+    $fh.printf: "(File: %s:%s      Page: %d) show\n", $hostname, $outfile-ps, $d.page-num;
+
+    $fh.printf: "%.4f %.4f moveto\n", $page-left, $page-top - 0.4 * $IN2PT - 7.0;
+    $fh.printf: "(Date: %s) show\n", $date-string;
+    $fh.say: "grestore";
+}
+
+sub start-ps-page($fh, PSDoc $d) {
+    ++$d.page-num;
+    $fh.say: "%%PAGE: {$d.page-num} {$d.page-num}";
+    $fh.say: 'save';
+}
+
+sub start-ps-doc($fh, PSDoc $d) {
+    # prologue, if any, and outer save
+    $fh.say: q:to/HERE/;
+    %%!PS-Adobe-3.0
+    %%Pages: (atend)
+    %%PageOrder: Ascend
+    save
+    HERE
+}
+
+sub end-ps-doc($fh, PSDoc $d) {
+    # total number of pages should be d.page-num 
+    $fh.say: "restore";
+    $fh.say: "%%Trailer";
+    $fh.say: "%%Pages: {$d.page-num}";
+    $fh.say: "%%EOF";
+}
+
+=begin comment
+say "debug: tbuf: '{$tbuf.buf}'";
+# setting a class attribute:
+$tbuf.buf = 'something';
+say "debug: tbuf: '{$tbuf.buf}'";
+die "debug exit";
+=end comment

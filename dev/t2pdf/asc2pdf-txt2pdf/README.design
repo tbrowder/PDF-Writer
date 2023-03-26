@@ -1,0 +1,22 @@
+Make a base class that has fundamental attributes to be shared by most
+other PostScript objects.
+
+A document input file is expected to be one of two types:
+
+  1. source code where each line must retain its content, although the
+     line may be wrapped as many times as necessary and with an
+     explicit mareker to indicate that fact, and a monospaced font is
+     used.
+
+  2. text that consists of paragraphs separated by one or more blank
+     lines with a propotional font, allow for kerning, and allow for a
+     limited set of in-line text formatting commands
+
+Lines may be numbered in either type.
+
+The input file is assumed to be source code unless the '-w' option
+(word processing) is used.
+
+A source code file is not checked for any special characters with one
+exception: parentheses, of either side, will be escaped for PostScript
+use.

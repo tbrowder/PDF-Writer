@@ -1,0 +1,634 @@
+%%!
+%%STARTDOCUMENT
+save
+/Courier findfont
+10.0000 scalefont setfont
+%%STARTPAGE
+save
+gsave
+/Courier-Bold findfont
+7 scalefont setfont
+72.0000 763.2000 moveto
+(File: juvat2:/usr/local/people/tbrowde/mydata/tbrowde-home-bzr/tscript/make-tbs-roster.p6.pdf      Page: 1) show
+72.0000 756.2000 moveto
+(Date: 2017-06-01) show
+grestore
+66.0000 710.0000 moveto
+( #!/usr/bin/env perl6) show
+66.0000 700.0000 moveto
+() show
+66.0000 690.0000 moveto
+( use strict;) show
+66.0000 680.0000 moveto
+( use warnings;) show
+66.0000 670.0000 moveto
+( use lib\() show
+66.0000 660.0000 moveto
+( './web-sites',) show
+66.0000 650.0000 moveto
+( './rtf-modules',) show
+66.0000 640.0000 moveto
+( \);) show
+66.0000 630.0000 moveto
+( use Data::Dumper;) show
+66.0000 620.0000 moveto
+( use Carp;) show
+66.0000 610.0000 moveto
+() show
+66.0000 600.0000 moveto
+( # for GEO info \(google not working\)) show
+66.0000 590.0000 moveto
+( use Geo::Ellipsoid;) show
+66.0000 580.0000 moveto
+() show
+66.0000 570.0000 moveto
+( # other data and functions) show
+66.0000 560.0000 moveto
+( use GEO_DATA_TBS; # auto-generated) show
+66.0000 550.0000 moveto
+( use CLASSMATES_FUNCS qw\(:all\);) show
+66.0000 540.0000 moveto
+() show
+66.0000 530.0000 moveto
+( use GENFUNCS;) show
+66.0000 520.0000 moveto
+( use Member;) show
+66.0000 510.0000 moveto
+( use KIA;) show
+66.0000 500.0000 moveto
+() show
+66.0000 490.0000 moveto
+( # for rtf) show
+66.0000 480.0000 moveto
+( #use Biblio;) show
+66.0000 470.0000 moveto
+( use MyRTF;) show
+66.0000 460.0000 moveto
+( #use GenFuncs qw\(:all\);) show
+66.0000 450.0000 moveto
+() show
+66.0000 440.0000 moveto
+( my @wkeys = qw\(tbs\);) show
+66.0000 430.0000 moveto
+( my %wkeys;) show
+66.0000 420.0000 moveto
+( @wkeys{@wkeys} = \(\);) show
+66.0000 410.0000 moveto
+() show
+66.0000 400.0000 moveto
+( if \(!@ARGV\) {) show
+66.0000 390.0000 moveto
+( print <<"HERE";) show
+66.0000 380.0000 moveto
+( Usage: $0 <key name> map | geo | mem | reunion | admin) show
+66.0000 370.0000 moveto
+() show
+66.0000 360.0000 moveto
+( Makes a map page \(or member list\) from appropriate contact data) show
+66.0000 350.0000 moveto
+( where <key name> is one of:) show
+66.0000 340.0000 moveto
+() show
+66.0000 330.0000 moveto
+( HERE) show
+66.0000 320.0000 moveto
+() show
+66.0000 310.0000 moveto
+( print "  $_\\n" for @wkeys;) show
+66.0000 300.0000 moveto
+() show
+66.0000 290.0000 moveto
+( print <<"HERE2";) show
+66.0000 280.0000 moveto
+() show
+66.0000 270.0000 moveto
+( modes) show
+66.0000 260.0000 moveto
+() show
+66.0000 250.0000 moveto
+( geo - write a geocode file for use with Google maps for finding lat/long) show
+66.0000 240.0000 moveto
+() show
+66.0000 230.0000 moveto
+( map - use geocode data to produce a map of member locations) show
+66.0000 220.0000 moveto
+() show
+66.0000 210.0000 moveto
+( mem - write a new member text source file \(without deceased\)) show
+66.0000 200.0000 moveto
+() show
+66.0000 190.0000 moveto
+( admin - write a member file with deceased and KIA at the end) show
+66.0000 180.0000 moveto
+() show
+66.0000 170.0000 moveto
+( reunion - write a member rtf file for reunion attendees) show
+66.0000 160.0000 moveto
+() show
+66.0000 150.0000 moveto
+( HERE2) show
+66.0000 140.0000 moveto
+() show
+66.0000 130.0000 moveto
+( exit;) show
+66.0000 120.0000 moveto
+( }) show
+66.0000 110.0000 moveto
+() show
+66.0000 100.0000 moveto
+( my $map     = 0;) show
+66.0000 90.0000 moveto
+( my $geo     = 0;) show
+66.0000 80.0000 moveto
+( my $mem     = 0;) show
+showpage
+restore
+%%ENDPAGE
+%%STARTPAGE
+save
+gsave
+/Courier-Bold findfont
+7 scalefont setfont
+72.0000 763.2000 moveto
+(File: juvat2:/usr/local/people/tbrowde/mydata/tbrowde-home-bzr/tscript/make-tbs-roster.p6.pdf      Page: 2) show
+72.0000 756.2000 moveto
+(Date: 2017-06-01) show
+grestore
+66.0000 710.0000 moveto
+( my $admin   = 0;) show
+66.0000 700.0000 moveto
+( my $reunion = 0;) show
+66.0000 690.0000 moveto
+() show
+66.0000 680.0000 moveto
+( my $wkey     = '';) show
+66.0000 670.0000 moveto
+( my $map_page = '';) show
+66.0000 660.0000 moveto
+( my $pdir     = '';) show
+66.0000 650.0000 moveto
+() show
+66.0000 640.0000 moveto
+( sub zero_modes {) show
+66.0000 630.0000 moveto
+( $map     = 0;) show
+66.0000 620.0000 moveto
+( $geo     = 0;) show
+66.0000 610.0000 moveto
+( $mem     = 0;) show
+66.0000 600.0000 moveto
+( $admin   = 0;) show
+66.0000 590.0000 moveto
+( $reunion = 0;) show
+66.0000 580.0000 moveto
+( }) show
+66.0000 570.0000 moveto
+() show
+66.0000 560.0000 moveto
+( foreach my $arg \(@ARGV\) {) show
+66.0000 550.0000 moveto
+( if \($arg eq 'tbs'\) {) show
+66.0000 540.0000 moveto
+( die "FATAL:  Attempting to use multiple web site keys: '$wkey' and '$arg'.\\n") show
+66.0000 530.0000 moveto
+( if \($wkey\);) show
+66.0000 520.0000 moveto
+( my $domain = 'novco1968tbs.com';) show
+66.0000 510.0000 moveto
+( $wkey      = 'tbs';) show
+66.0000 500.0000 moveto
+( $pdir      = './web-sites/${domain}/public';) show
+66.0000 490.0000 moveto
+( $map_page  = "${pdir}/map-all.html";) show
+66.0000 480.0000 moveto
+( }) show
+66.0000 470.0000 moveto
+( elsif \($arg eq 'map'\) {) show
+66.0000 460.0000 moveto
+( zero_modes\(\);) show
+66.0000 450.0000 moveto
+( $map = 1;) show
+66.0000 440.0000 moveto
+( }) show
+66.0000 430.0000 moveto
+( elsif \($arg eq 'geo'\) {) show
+66.0000 420.0000 moveto
+( zero_modes\(\);) show
+66.0000 410.0000 moveto
+( $geo = 1;) show
+66.0000 400.0000 moveto
+( }) show
+66.0000 390.0000 moveto
+( elsif \($arg eq 'mem'\) {) show
+66.0000 380.0000 moveto
+( zero_modes\(\);) show
+66.0000 370.0000 moveto
+( $mem = 1;) show
+66.0000 360.0000 moveto
+( }) show
+66.0000 350.0000 moveto
+( elsif \($arg eq 'admin'\) {) show
+66.0000 340.0000 moveto
+( zero_modes\(\);) show
+66.0000 330.0000 moveto
+( $mem   = 1;) show
+66.0000 320.0000 moveto
+( $admin = 1;) show
+66.0000 310.0000 moveto
+( }) show
+66.0000 300.0000 moveto
+( elsif \($arg =~ /^re/\) {) show
+66.0000 290.0000 moveto
+( zero_modes\(\);) show
+66.0000 280.0000 moveto
+( $reunion = 1;) show
+66.0000 270.0000 moveto
+( }) show
+66.0000 260.0000 moveto
+( else {) show
+66.0000 250.0000 moveto
+( die "FATAL:  Unknown arg '$arg'.\\n";) show
+66.0000 240.0000 moveto
+( }) show
+66.0000 230.0000 moveto
+( }) show
+66.0000 220.0000 moveto
+() show
+66.0000 210.0000 moveto
+( die "FATAL:  No web site key entered.\\n") show
+66.0000 200.0000 moveto
+( if !$wkey;) show
+66.0000 190.0000 moveto
+() show
+66.0000 180.0000 moveto
+( die "FATAL:  Unknown web site key '$wkey'.\\n") show
+66.0000 170.0000 moveto
+( if \(! exists $wkeys{$wkey}\);) show
+66.0000 160.0000 moveto
+() show
+66.0000 150.0000 moveto
+( die "FATAL:  Need to choose one mode of: 'map', 'geo', 'mem', or 'reunion'.\\n") show
+66.0000 140.0000 moveto
+( if \(!$map && !$geo && !$mem && !$reunion\);) show
+66.0000 130.0000 moveto
+() show
+66.0000 120.0000 moveto
+( my @ofils = \(\);) show
+66.0000 110.0000 moveto
+() show
+66.0000 100.0000 moveto
+( if \($wkey eq 'tbs'\) {) show
+66.0000 90.0000 moveto
+( my $dir = 'web-sites/novco1968tbs.com/public';) show
+66.0000 80.0000 moveto
+( my $ifil = "$dir/brothers.source";) show
+showpage
+restore
+%%ENDPAGE
+%%STARTPAGE
+save
+gsave
+/Courier-Bold findfont
+7 scalefont setfont
+72.0000 763.2000 moveto
+(File: juvat2:/usr/local/people/tbrowde/mydata/tbrowde-home-bzr/tscript/make-tbs-roster.p6.pdf      Page: 3) show
+72.0000 756.2000 moveto
+(Date: 2017-06-01) show
+grestore
+66.0000 710.0000 moveto
+() show
+66.0000 700.0000 moveto
+( open my $fp, '<', $ifil) show
+66.0000 690.0000 moveto
+( or die "$ifil: $!";) show
+66.0000 680.0000 moveto
+() show
+66.0000 670.0000 moveto
+( # get the current members data) show
+66.0000 660.0000 moveto
+( my %members = \(\);) show
+66.0000 650.0000 moveto
+( my $m = 0;) show
+66.0000 640.0000 moveto
+( while \(defined\(my $line = <$fp>\)\) {) show
+66.0000 630.0000 moveto
+( chomp $line;) show
+66.0000 620.0000 moveto
+( my \($ltyp, $key, $text\) = GENFUNCS::get_line_type_member\($line\);) show
+66.0000 610.0000 moveto
+( my @toks = split ' ', $text;) show
+66.0000 600.0000 moveto
+() show
+66.0000 590.0000 moveto
+( if \($key eq 'name'\) {) show
+66.0000 580.0000 moveto
+( # starting a new member object) show
+66.0000 570.0000 moveto
+( # new object) show
+66.0000 560.0000 moveto
+( # $text = name) show
+66.0000 550.0000 moveto
+( my $name = $text;) show
+66.0000 540.0000 moveto
+() show
+66.0000 530.0000 moveto
+( my \($last, $first, $middle, $suff\) = GENFUNCS::split_name\($name\);) show
+66.0000 520.0000 moveto
+( $m = Member->new\(\);) show
+66.0000 510.0000 moveto
+( $m->name\($name\);) show
+66.0000 500.0000 moveto
+( $m->lastname\($last\);) show
+66.0000 490.0000 moveto
+( $m->firstname\($first\);) show
+66.0000 480.0000 moveto
+( $m->middlename\($middle\);) show
+66.0000 470.0000 moveto
+( $m->suffix\($suff\);) show
+66.0000 460.0000 moveto
+() show
+66.0000 450.0000 moveto
+( # we need a key for file names and hashes) show
+66.0000 440.0000 moveto
+( $m->create_name_key\(\);) show
+66.0000 430.0000 moveto
+( my $nk = $m->name_key\(\);) show
+66.0000 420.0000 moveto
+( die "FATAL:  Duplicate name key '$nk'") show
+66.0000 410.0000 moveto
+( if exists $members{$nk};) show
+66.0000 400.0000 moveto
+( $members{$nk} = $m;) show
+66.0000 390.0000 moveto
+( }) show
+66.0000 380.0000 moveto
+( elsif \($key eq 'pic'\) {) show
+66.0000 370.0000 moveto
+( ; # ignore) show
+66.0000 360.0000 moveto
+( }) show
+66.0000 350.0000 moveto
+( elsif \($key\) {) show
+66.0000 340.0000 moveto
+( # now handle the key/value pair) show
+66.0000 330.0000 moveto
+( no strict 'refs';) show
+66.0000 320.0000 moveto
+( $m-> $key \($text\);) show
+66.0000 310.0000 moveto
+( }) show
+66.0000 300.0000 moveto
+( }) show
+66.0000 290.0000 moveto
+() show
+66.0000 280.0000 moveto
+( #print Dumper\(\\%members\); die "debug exit";) show
+66.0000 270.0000 moveto
+() show
+66.0000 260.0000 moveto
+( if \($map\) {) show
+66.0000 250.0000 moveto
+( # generate the appropriate map page) show
+66.0000 240.0000 moveto
+( print_member_map\('tbs', \\@ofils, \\%members\);) show
+66.0000 230.0000 moveto
+( }) show
+66.0000 220.0000 moveto
+( elsif \($geo\) {) show
+66.0000 210.0000 moveto
+( # print geo data) show
+66.0000 200.0000 moveto
+( print_geo_data2\('tbs', \\@ofils, \\%members\);) show
+66.0000 190.0000 moveto
+( }) show
+66.0000 180.0000 moveto
+( elsif \($mem || $admin\) {) show
+66.0000 170.0000 moveto
+( # print member data) show
+66.0000 160.0000 moveto
+( print_member_data\('tbs', \\@ofils, \\%members, $admin\);) show
+66.0000 150.0000 moveto
+( }) show
+66.0000 140.0000 moveto
+( elsif \($reunion\) {) show
+66.0000 130.0000 moveto
+( # print member data) show
+66.0000 120.0000 moveto
+( print_member_data_rtf\({) show
+66.0000 110.0000 moveto
+( key          => 'tbs',) show
+66.0000 100.0000 moveto
+( ofils_aref   => \\@ofils,) show
+66.0000 90.0000 moveto
+( members_href => \\%members,) show
+66.0000 80.0000 moveto
+( reunion      => 1,) show
+showpage
+restore
+%%ENDPAGE
+%%STARTPAGE
+save
+gsave
+/Courier-Bold findfont
+7 scalefont setfont
+72.0000 763.2000 moveto
+(File: juvat2:/usr/local/people/tbrowde/mydata/tbrowde-home-bzr/tscript/make-tbs-roster.p6.pdf      Page: 4) show
+72.0000 756.2000 moveto
+(Date: 2017-06-01) show
+grestore
+66.0000 710.0000 moveto
+( }\);) show
+66.0000 700.0000 moveto
+( }) show
+66.0000 690.0000 moveto
+( }) show
+66.0000 680.0000 moveto
+() show
+66.0000 670.0000 moveto
+( print "Normal end.\\n";) show
+66.0000 660.0000 moveto
+( if \(@ofils\) {) show
+66.0000 650.0000 moveto
+( my $s = @ofils > 1 ? 's' : '';) show
+66.0000 640.0000 moveto
+( print "See file$s:\\n";) show
+66.0000 630.0000 moveto
+( print "  $_\\n" for @ofils;) show
+66.0000 620.0000 moveto
+( }) show
+66.0000 610.0000 moveto
+( else {) show
+66.0000 600.0000 moveto
+( print "No files generated.\\n";) show
+66.0000 590.0000 moveto
+( }) show
+66.0000 580.0000 moveto
+() show
+66.0000 570.0000 moveto
+( ##### subroutines #####) show
+66.0000 560.0000 moveto
+( sub print_member_map {) show
+66.0000 550.0000 moveto
+( # prints an output file of Google map data for member locations) show
+66.0000 540.0000 moveto
+( my $key          = shift @_; # 'tbs') show
+66.0000 530.0000 moveto
+( my $ofils_aref   = shift @_; # an array ref for generated files) show
+66.0000 520.0000 moveto
+( my $members_href = shift @_; # a hash ref of member objects) show
+66.0000 510.0000 moveto
+() show
+66.0000 500.0000 moveto
+( my $dir          = '';) show
+66.0000 490.0000 moveto
+( my $geodata_href = '';) show
+66.0000 480.0000 moveto
+( if \($key eq 'tbs'\) {) show
+66.0000 470.0000 moveto
+( $dir          = 'web-sites/novco1968tbs.com/public';) show
+66.0000 460.0000 moveto
+( $geodata_href =  \\%GEO_DATA_TBS::geodata;) show
+66.0000 450.0000 moveto
+( }) show
+66.0000 440.0000 moveto
+() show
+66.0000 430.0000 moveto
+( my $ofil = "${dir}/map-all.html";) show
+66.0000 420.0000 moveto
+( open my $fp, '>', $ofil) show
+66.0000 410.0000 moveto
+( or die "$ofil: $!";) show
+66.0000 400.0000 moveto
+() show
+66.0000 390.0000 moveto
+( push @{$ofils_aref}, $ofil;) show
+66.0000 380.0000 moveto
+() show
+66.0000 370.0000 moveto
+( my @names = \(keys %{$members_href}\);) show
+66.0000 360.0000 moveto
+() show
+66.0000 350.0000 moveto
+( my $p = MapParams->new\(\);) show
+66.0000 340.0000 moveto
+( # set values) show
+66.0000 330.0000 moveto
+( $p->ctr_lat\($GEO_DATA_TBS::ctr_lat\);) show
+66.0000 320.0000 moveto
+( $p->ctr_lng\($GEO_DATA_TBS::ctr_lng\);) show
+66.0000 310.0000 moveto
+( $p->min_lat\($GEO_DATA_TBS::min_lat\);) show
+66.0000 300.0000 moveto
+( $p->min_lng\($GEO_DATA_TBS::min_lng\);) show
+66.0000 290.0000 moveto
+( $p->max_lat\($GEO_DATA_TBS::max_lat\);) show
+66.0000 280.0000 moveto
+( $p->max_lng\($GEO_DATA_TBS::max_lng\);) show
+66.0000 270.0000 moveto
+() show
+66.0000 260.0000 moveto
+( # normal entry function) show
+66.0000 250.0000 moveto
+( # CLASSMATES_FUNCS::print_map_data) show
+66.0000 240.0000 moveto
+( print_map_header_tbs\($fp, 'tbs', $p\);) show
+66.0000 230.0000 moveto
+() show
+66.0000 220.0000 moveto
+( # get geo ellipsoid data) show
+66.0000 210.0000 moveto
+( use Geo::Ellipsoid;) show
+66.0000 200.0000 moveto
+( my $geoid = Geo::Ellipsoid->new\() show
+66.0000 190.0000 moveto
+( ellipsoid      =>'WGS84', #the default \('NAD27' used in example\),) show
+66.0000 180.0000 moveto
+( units          =>'degrees',) show
+66.0000 170.0000 moveto
+( distance_units => 'mile',) show
+66.0000 160.0000 moveto
+( longitude      => 1, # +/- pi radians) show
+66.0000 150.0000 moveto
+( bearing        => 0, # 0-360 degrees) show
+66.0000 140.0000 moveto
+( \);) show
+66.0000 130.0000 moveto
+( # establish a random seed) show
+66.0000 120.0000 moveto
+( srand\(1\);) show
+66.0000 110.0000 moveto
+() show
+66.0000 100.0000 moveto
+( # write array of markers) show
+66.0000 90.0000 moveto
+( print_map_markers_tbs\($fp) show
+66.0000 80.0000 moveto
+( , $geoid) show
+showpage
+restore
+%%ENDPAGE
+%%STARTPAGE
+save
+gsave
+/Courier-Bold findfont
+7 scalefont setfont
+72.0000 763.2000 moveto
+(File: juvat2:/usr/local/people/tbrowde/mydata/tbrowde-home-bzr/tscript/make-tbs-roster.p6.pdf      Page: 5) show
+72.0000 756.2000 moveto
+(Date: 2017-06-01) show
+grestore
+66.0000 710.0000 moveto
+( , $members_href) show
+66.0000 700.0000 moveto
+( , $geodata_href) show
+66.0000 690.0000 moveto
+( \);) show
+66.0000 680.0000 moveto
+() show
+66.0000 670.0000 moveto
+( print_close_function_initialize\($fp\);) show
+66.0000 660.0000 moveto
+() show
+66.0000 650.0000 moveto
+( print_map_end\($fp\);) show
+66.0000 640.0000 moveto
+( close $fp;) show
+66.0000 630.0000 moveto
+( # finished with html file) show
+66.0000 620.0000 moveto
+() show
+66.0000 610.0000 moveto
+( } # print_member_map) show
+66.0000 600.0000 moveto
+() show
+66.0000 590.0000 moveto
+( =pod) show
+66.0000 580.0000 moveto
+() show
+66.0000 570.0000 moveto
+( sub print_map_data_tbs {) show
+66.0000 560.0000 moveto
+( my $href = shift @_;) show
+66.0000 550.0000 moveto
+() show
+66.0000 540.0000 moveto
+( # error check) show
+66.0000 530.0000 moveto
+( my $reftyp = ref $href;) show
+66.0000 520.0000 moveto
+( if \($reftyp ne 'HASH'\) {) show
+66.0000 510.0000 moveto
+( confess "ERROR: \\$href is not a HASH reference!  It's a '$reftyp'.";) show
+66.0000 500.0000 moveto
+( }) show
+66.0000 490.0000 moveto
+() show
+66.0000 480.0000 moveto
+( my $typ            = $href->{type};      # '$HSHS1961' or '$USAFA1965') show
+66.0000 470.0000 moveto
+( my $ofils_aref     = $href->{ofilsref};  # an array ref of all output files) show
+66.0000 460.0000 moveto
+( my $cmates_aref    = $href->{cmatesref}; # an array ref of all classmates) show
+66.0000 450.0000 moveto
+( my $cmate_href     = $href->{cmateref};  # a hash ref of all classmates) show
+66.0000 440.0000 moveto
