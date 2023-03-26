@@ -1,7 +1,10 @@
 unit module PDF::Writer:ver<0.0.6>:auth<cpan:TBROWDER>;
 
 use PDF:ver<0.4.5+>;
+use PDF::Content:ver<0.4.9+>;
 use PDF::Lite;
+use PDF::Document;
+use Font::AFM; # for access to metrics
 
 #enum Font is export <Courier Times Helvetica>;
 enum Weight is export <Bold>;
@@ -57,32 +60,11 @@ class Doc is export {
         $!leading       = $leading;
         $!leading-ratio = $!leading / $!size;
     }
-
-    method get-font($name, :$weight, :$style) {
-        # Given a valid core-font name, and optional weight and style,
-        # return the PDF font object for it.
-        my $w = $weight;
-        my $s = $style;
-        given $name {
-            when $name eq 'Courier' {
-                when $weight eq '' {
-                }
-            }
-            when $name eq 'Helvetica' {
-            }
-            when $name eq 'Times' {
-            }
-            default {
-                die "FATAL: Unknown font name '$name'.";
-            }
-        }
-    }
-
 }
 
 sub text2pdf(@lines, :$doc, :$debug,
             ) is export {
-    # line-by-line (the original method
+    # line-by-line
 
     # for now we just need a conversion to pdf
     # determine how many pages:
@@ -98,9 +80,24 @@ sub text2pdf(@lines, :$doc, :$debug,
 
     # Add a blank page to start
     my $page = $doc.Pdf.add-page();
+
+=begin comment
     my $font = $page.core-font(:family<Courier>);
-    #my $font = $doc.Pdf.core-font(:family<Helvetica>, :weight<Bold>, :Style<Italic>);
+=end comment
+    my $courier = find-font :name<c>, :pdf($doc.Pdf);
     my $size = $doc.size;
+    my $c95 = select-font :fontfamily($courier), :size($size);
+    my $font = $c95;
+
+    # NOTE: All measurements in AFM files are given in terms of units
+    # equal to 1/1000 of the scale factor of the font being used. To
+    # compute actual sizes in a document, these amounts should be
+    # multiplied by (scale factor of font)/1000.
+
+    # get the underline distance from the metrics
+    # NOTE: the results need to be multiplied: results X (desired-size)/1000
+    my $udist  = $font.fontfamily.afm.UnderlinePosition * $size/1000;
+    my $uthick = $font.fontfamily.afm.UnderlineThickness * $size/1000;
 
     my $x  = $doc.left;
     my $y0 = $doc.height - $doc.top - $doc.leading;
@@ -110,7 +107,7 @@ sub text2pdf(@lines, :$doc, :$debug,
     for @lines -> $line {
         # add the line's text to the page
         $page.text: {
-            .font = $font, $doc.size;
+            .font = $courier, $size;
             .text-position = $x, $y;
             .say($line);
         }
@@ -119,9 +116,9 @@ sub text2pdf(@lines, :$doc, :$debug,
             $page.graphics: {
                 # automatically protects with a Save/Restore
                 # need thinnest line from $x to $width-$right
-                .LineWidth = 0; # thin as possible
-                .MoveTo($x, $y-1);
-                .LineTo($xx, $y-1);
+                .LineWidth = $uthick; # thin as possible
+                .MoveTo($x, $y-$udist);
+                .LineTo($xx, $y-$udist);
                 .Stroke;
             }
         }

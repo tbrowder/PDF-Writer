@@ -1,11 +1,14 @@
 #!/usr/bin/env raku
 
+use PDF::Content:ver<0.4.9+>;
 use PDF::Lite;
+use Font::AFM;
 
 my $pdf = PDF::Lite.new;
 my $page = $pdf.add-page;
 my $fnam = "Courier";
 my $font = get-font $pdf, $fnam;
+#$font = Font::AFM.new: :name<Helvetica>;
 
 for 0..3 -> $i {
     # put some text on the page
@@ -15,7 +18,7 @@ for 0..3 -> $i {
     }
 
     last if $i == 3;
-    # get a new page 
+    # get a new page
     $page = $pdf.add-page;
 }
 
@@ -25,8 +28,13 @@ $pdf.save-as: $ofil;
 say "Normal end. See new file '$ofil'.";
 
 sub get-font($pdf, $name, :$weight, :$style) {
+    my @f = <
+        Courier
+    >;
+
+    my %f;
     given $name {
-        when /Courier/ { 
+        when /Courier/ {
             $pdf.core-font(:family<Courier>);
         }
         default {
