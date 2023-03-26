@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/tbrowder/PDF-Writer/workflows/test/badge.svg)](https://github.com/tbrowder/PDF-Writer/actions)
+[![Actions Status](https://github.com/tbrowder/PDF-Writer/actions/workflows/linux.yml/badge.svg)](https://github.com/tbrowder/PDF-Writer/actions) [![Actions Status](https://github.com/tbrowder/PDF-Writer/actions/workflows/macos.yml/badge.svg)](https://github.com/tbrowder/PDF-Writer/actions) [![Actions Status](https://github.com/tbrowder/PDF-Writer/actions/workflows/windows.yml/badge.svg)](https://github.com/tbrowder/PDF-Writer/actions)
 
 NAME
 ====
