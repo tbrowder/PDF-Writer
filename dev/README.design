@@ -1,6 +1,24 @@
 The two modes are:
 
 + verbatim or text mode
-+ doc or typesetting
+
+  - see previous PostScript work, but use PDF modules
+
++ word processing or typesetting
+
+  - use pod as markup input
+    + identify specific markup to be handled
+      at each stage
+    + convert each pod node to a class or node
+    + a tree of parent and child nodes
+    
+
+  - identify config settings
+
+  - write a pod doc as a test input; it should
+    include a complete set of desired inputs
+    to handle non-mathematical text
+
+  
 
 
