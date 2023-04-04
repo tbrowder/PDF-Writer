@@ -47,6 +47,10 @@ die "FATAL: No input file entered." if not $ifil.IO.r;
 say "Processing input file '$ifil'...";
 say "  Debug is true." if $debug;
 
+my @nodes;
+my @lines = $ifil.IO.lines;
+
+:
 =finish
 
 use PDF::Content:ver<0.4.9+>;
