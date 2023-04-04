@@ -673,9 +673,8 @@ ok
 =para
     # or simply include it as needed
 
-=begin code
     $ raku -Iinst#/home/raku/custom -e "use Text::Table::Simple; say 'ok'"
+
     ok
-=end code
 
 =end pod
