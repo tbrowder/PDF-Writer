@@ -7,15 +7,20 @@ class Node {
     has Node $.siblings;
 }
 
+
+my $dfil = "test-pod/zef.pod";
 if not @*ARGS.elems {
     print qq:to/HERE/;
-    Usage: {$*PROGRAM.basename} <Rakudoc> [...options...] [debug]
+    Usage: {$*PROGRAM.basename} go | <Rakudoc> [...options...] [debug]
 
     Reads a Rakudoc file and converts it to
     word-processed PDF.
 
     Note the entire input file must be pure
     Rakudoc.
+
+    With the 'go' mode the input file is:
+        {$dfil}
     HERE
     exit
 }
@@ -27,12 +32,18 @@ for @*ARGS {
         $ifil = $_;
     }
     when /^:i d/ { ++$debug }
+    when /^:i g/ { 
+        ; # ok
+    }
     default {
         die "FATAL: Unknown arg '$_'";
     }
 }
 
-die "FATAL: No input file entered." if not $ifil.defined;
+if not $ifil.defined {
+    $ifil = $dfil;
+}
+die "FATAL: No input file entered." if not $ifil.IO.r;
 say "Processing input file '$ifil'...";
 say "  Debug is true." if $debug;
 
