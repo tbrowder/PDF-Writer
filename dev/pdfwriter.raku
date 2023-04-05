@@ -7,7 +7,6 @@ class Node {
     has Node $.siblings;
 }
 
-
 my $dfil = "test-pod/zef.pod";
 if not @*ARGS.elems {
     print qq:to/HERE/;
@@ -47,10 +46,33 @@ die "FATAL: No input file entered." if not $ifil.IO.r;
 say "Processing input file '$ifil'...";
 say "  Debug is true." if $debug;
 
+use Text::Utils :ALL;
+
 my @nodes;
 my @lines = $ifil.IO.lines;
 
-:
+for @lines -> $line is copy {
+    if $line !~~ /\S/ {
+        # a blank line
+    }
+    elsif $line ~~ /^ \h* '=begin' \h+ (\S+) [\h+ (':' \N+)]? / {
+        # a begin X line with possible config info
+    }
+    elsif $line ~~ /^ \h* '=for' \h+ (\S+) [\h+ (':' \N+)]? / {
+        # a for X line with possible config info
+    }
+    elsif $line ~~ /^ \h+ (\N+) / {
+        # a possible code line with indent OR a text line
+    }
+    elsif $line ~~ /^ (\N+) / {
+        # a text line
+    }
+    else {
+        die "FATAL: unknown type of line: |$line|";
+    }
+}
+
+
 =finish
 
 use PDF::Content:ver<0.4.9+>;

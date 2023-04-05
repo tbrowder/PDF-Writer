@@ -26,3 +26,5 @@ code blocks
 
 formatting codes
 
+=config type :stuff
+= :more-stuff
