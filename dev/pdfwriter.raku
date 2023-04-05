@@ -53,7 +53,7 @@ my @lines = $ifil.IO.lines;
 
 for @lines -> $line is copy {
     if $line !~~ /\S/ {
-        # a blank line
+        # a blank line: ends a block UNLESS in a code block
     }
     elsif $line ~~ /^ \h* '=begin' \h+ (\S+) [\h+ (':' \N+)]? / {
         # a begin X line with possible config info
