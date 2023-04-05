@@ -27,13 +27,13 @@ if not @*ARGS.elems {
 my $ifil;
 my $debug = 0;
 for @*ARGS {
+    when /^:i g/ { 
+        $ifil = $dfil;
+    }
     when $_.IO.r {
         $ifil = $_;
     }
     when /^:i d/ { ++$debug }
-    when /^:i g/ { 
-        ; # ok
-    }
     default {
         die "FATAL: Unknown arg '$_'";
     }
