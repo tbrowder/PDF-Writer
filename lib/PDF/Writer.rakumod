@@ -10,7 +10,7 @@ use Font::AFM; # for access to metrics
 enum Weight is export <Bold>;
 enum Style is export <Regular Italic Slant>;
 
-class Doc is export {
+class WDoc is export {
     # doc attrs that depend upon PDF::API6
     has $.Page is rw;
     has $.Pdf  is rw;
@@ -22,7 +22,7 @@ class Doc is export {
     # all attrs below here may be defined in the TOML file
     # doc attrs with defaults:
     has $.font  is rw = "Courier";
-    has Real $.size  is rw = 9.5;
+    has Real $.size is rw = 9.5;
     has $.paper is rw = 'Letter';
     has $.title is rw = 1;
 
@@ -81,13 +81,14 @@ sub text2pdf(@lines, :$doc, :$debug,
     # Add a blank page to start
     my $page = $doc.Pdf.add-page();
 
-=begin comment
     my $font = $page.core-font(:family<Courier>);
-=end comment
-    my $courier = find-font :name<c>, :pdf($doc.Pdf);
     my $size = $doc.size;
+    my $courier = $font; #find-font :name<c>, :pdf($doc.Pdf);
+=begin comment
+    my $courier = find-font :name<c>, :pdf($doc.Pdf);
     my $c95 = select-font :fontfamily($courier), :size($size);
     my $font = $c95;
+=end comment
 
     # NOTE: All measurements in AFM files are given in terms of units
     # equal to 1/1000 of the scale factor of the font being used. To
