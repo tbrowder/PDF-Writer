@@ -2,15 +2,14 @@
 
 class Node {...}
 class Node {
-    has Node @.children;
-    has Node $.parent;
-    has Node $.siblings;
+    has Node @.prev;
+    has Node @.succ;
 }
 
 my $dfil = "test-pod/zef.pod";
 if not @*ARGS.elems {
     print qq:to/HERE/;
-    Usage: {$*PROGRAM.basename} go | <Rakudoc> [...options...] [debug]
+    Usage: {$*PROGRAM.basename} go | <Rakudoc file> [help] [debug]
 
     Reads a Rakudoc file and converts it to
     word-processed PDF.
@@ -29,6 +28,9 @@ my $debug = 0;
 for @*ARGS {
     when /^:i g/ { 
         $ifil = $dfil;
+    }
+    when /^:i h/ { 
+        help;
     }
     when $_.IO.r {
         $ifil = $_;
@@ -52,7 +54,7 @@ my @nodes;
 my @lines = $ifil.IO.lines;
 
 my $typename;
-my $in-block = 0:
+my $in-block = 0;
 for @lines -> $line is copy {
     if $line !~~ /\S/ {
         # a blank line: ends a block UNLESS in a =begin code block
@@ -82,6 +84,21 @@ for @lines -> $line is copy {
     }
 }
 
+sub help {
+    print qq:to/HERE/;
+    Base font: Times 12 pt
+    Bold       TimesBold 12 pt
+    Italic     TimesItalic 12 pt
+    
+    Headings   HelveticaBold
+      head1      20 pt
+      head2      18 pt
+      head3      16 pt
+      head4      14 pt
+      head5      12 pt
+    HERE
+    exit;
+}
 
 =finish
 
@@ -162,3 +179,9 @@ $page.text: {
 # Save the new PDF
 $pdf.save-as($ofil);
 say "See file '$ofil'";
+
+### subs 
+constant %defs = [
+];
+
+
