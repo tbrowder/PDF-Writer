@@ -1,0 +1,43 @@
+The two modes are:
+
++ verbatim or text mode
+
+  - see previous PostScript work, but use PDF modules
+
++ word processing or typesetting
+
+  - use pod as markup input
+  - input is assumed to be all pod
+    (=begin/=end pod lines are not
+     required but any :config keys on the =begin
+     will be retained); using more than one
+     pair of the lines is an error
+  - input will be split into chunks 
+    for further processing
+    + chunks will be vertical nodes (class DocNode)
+      on a single page until final
+      pagination
+
+
+
+
+
+
+
+
+
+    + identify specific markup to be handled
+      at each stage
+    + convert each pod node to a class or node
+    + a tree of parent and child nodes
+    
+
+  - identify config settings
+
+  - write a pod doc as a test input; it should
+    include a complete set of desired inputs
+    to handle non-mathematical text
+
+  
+
+

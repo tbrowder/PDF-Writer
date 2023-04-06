@@ -1,0 +1,30 @@
+Currently allowed pod blocks
+============================
+
+bare paras
+
+=headN
+
+=item
+
+=begin/=end item
+
+nested items
+
+numbered items
+
+=comment
+=begin/=end comment
+
+code blocks
+
+=for para
+
+
+
+=begin/=end item
+
+formatting codes
+
+=config type :stuff
+= :more-stuff

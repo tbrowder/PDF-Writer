@@ -1,6 +1,6 @@
 {
   "api": "1",
-  "auth": "cpan:TBROWDER",
+  "auth": "zef:tbrowder",
   "authors": [
     "Tom Browder"
   ],
