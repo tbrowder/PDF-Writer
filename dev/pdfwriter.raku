@@ -51,15 +51,25 @@ use Text::Utils :ALL;
 my @nodes;
 my @lines = $ifil.IO.lines;
 
+my $typename;
+my $in-block = 0:
 for @lines -> $line is copy {
     if $line !~~ /\S/ {
-        # a blank line: ends a block UNLESS in a code block
+        # a blank line: ends a block UNLESS in a =begin code block
     }
     elsif $line ~~ /^ \h* '=begin' \h+ (\S+) [\h+ (':' \N+)]? / {
         # a begin X line with possible config info
+        if $in-block {
+            # end block
+        }
+        # start new block
     }
     elsif $line ~~ /^ \h* '=for' \h+ (\S+) [\h+ (':' \N+)]? / {
         # a for X line with possible config info
+        if $in-block {
+            # end block
+        }
+        # start new block
     }
     elsif $line ~~ /^ \h+ (\N+) / {
         # a possible code line with indent OR a text line
