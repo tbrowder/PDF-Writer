@@ -1,6 +1,8 @@
 Revision history for PDF-Writer
 
 {{$NEXT}}
+    - Move to Raku module repo Zef
+    - Improve examples
 
 0.0.6  2021-01-04T16:46:08-06:00
     - delete windows test

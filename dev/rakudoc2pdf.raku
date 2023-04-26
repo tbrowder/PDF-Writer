@@ -50,17 +50,21 @@ say "  Debug is true." if $debug;
 
 use Text::Utils :ALL;
 
-my @nodes;
 my @lines = $ifil.IO.lines;
 
+my @nodes;
 my $typename;
 my $in-block = 0;
+my @text;
+
 for @lines -> $line is copy {
     if $line !~~ /\S/ {
         # a blank line: ends a block UNLESS in a =begin code block
     }
     elsif $line ~~ /^ \h* '=begin' \h+ (\S+) [\h+ (':' \N+)]? / {
         # a begin X line with possible config info
+        $typename = ~$0;
+        $config   = $1.defined ?? ~$1 !! '';
         if $in-block {
             # end block
         }
@@ -68,6 +72,8 @@ for @lines -> $line is copy {
     }
     elsif $line ~~ /^ \h* '=for' \h+ (\S+) [\h+ (':' \N+)]? / {
         # a for X line with possible config info
+        $typename = ~$0;
+        $config   = $1.defined ?? ~$1 !! '';
         if $in-block {
             # end block
         }

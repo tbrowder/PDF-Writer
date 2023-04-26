@@ -2,7 +2,7 @@ unit module PDF::Writer:ver<0.0.6>:auth<cpan:TBROWDER>;
 
 use PDF:ver<0.4.5+>;
 use PDF::Content:ver<0.4.9+>;
-use PDF::Lite;
+#use PDF::Lite;
 use PDF::Document;
 use Font::AFM; # for access to metrics
 
@@ -97,8 +97,10 @@ sub text2pdf(@lines, :$doc, :$debug,
 
     # get the underline distance from the metrics
     # NOTE: the results need to be multiplied: results X (desired-size)/1000
-    my $udist  = $font.fontfamily.afm.UnderlinePosition * $size/1000;
-    my $uthick = $font.fontfamily.afm.UnderlineThickness * $size/1000;
+    #my $udist  = $font.fontfamily.afm.UnderlinePosition * $size/1000;
+    #my $uthick = $font.fontfamily.afm.UnderlineThickness * $size/1000;
+    my $udist  = $font.afm.UnderlinePosition * $size/1000;
+    my $uthick = $font.afm.UnderlineThickness * $size/1000;
 
     my $x  = $doc.left;
     my $y0 = $doc.height - $doc.top - $doc.leading;
